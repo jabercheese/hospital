@@ -215,6 +215,9 @@
             </div>
 
             <button onclick="attemptAuthentication()">Authenticate Credentials</button>
+            
+            <hr style="margin: 20px 0; border: 0; border-top: 1px dashed #cbd5e1;">
+            <button class="btn-danger" onclick="triggerMasterSystemReset()" style="margin-top:0;">⚠️ Master System Reset</button>
         </div>
     </div>
 
@@ -433,19 +436,24 @@
         let activeSelectedRoomName = null;
         let sessionUser = { name: null, role: null };
 
-        let state = {
-            managerPasscode: "1234",
-            users: [
-                { id: "u1", name: "Dr. Gregory House, MD", role: "doctor", pass: "1234" },
-                { id: "u2", name: "Dr. Meredith Grey, MD", role: "doctor", pass: "1234" },
-                { id: "u3", name: "Officer Smith", role: "admission", pass: "1234" },
-                { id: "u4", name: "Lab Tech Alpha", role: "labs", pass: "1234" }
-            ],
-            patientsLog: [],
-            rooms: {}
-        };
+        // DEFAULT FRESH STATE FACTORY
+        function getDefaultState() {
+            let freshRooms = {};
+            for(let i = 1; i <= TOTAL_ROOMS; i++) { freshRooms[`Room ${i}`] = null; }
+            return {
+                managerPasscode: "1234",
+                users: [
+                    { id: "u1", name: "Dr. Gregory House, MD", role: "doctor", pass: "1234" },
+                    { id: "u2", name: "Dr. Meredith Grey, MD", role: "doctor", pass: "1234" },
+                    { id: "u3", name: "Officer Smith", role: "admission", pass: "1234" },
+                    { id: "u4", name: "Lab Tech Alpha", role: "labs", pass: "1234" }
+                ],
+                patientsLog: [],
+                rooms: freshRooms
+            };
+        }
 
-        for(let i = 1; i <= TOTAL_ROOMS; i++) { state.rooms[`Room ${i}`] = null; }
+        let state = getDefaultState();
         const urgencyLabels = { 1: "Lvl 1: IMMEDIATE", 2: "Lvl 2: Very Urgent", 3: "Lvl 3: Urgent", 4: "Lvl 4: Standard", 5: "Lvl 5: Non-Urgent" };
 
         function init() {
@@ -467,6 +475,22 @@
         }
 
         function saveState() { localStorage.setItem('ER_COMMAND_STATE_SECURE_2026', JSON.stringify(state)); }
+
+        // RESET CORE ENGINE
+        function triggerMasterSystemReset() {
+            const promptCode = prompt("Enter the Master Passcode (1234) to confirm wiping all medical systems data:");
+            if (promptCode === "1234") {
+                state = getDefaultState();
+                saveState();
+                populateDoctorDropdowns();
+                updateRoomDropdown();
+                renderRoomsGrid();
+                renderHistoryTable();
+                alert("Database completely purged. Restored to default configurations.");
+            } else if (promptCode !== null) {
+                alert("Invalid Passcode. Reset canceled.");
+            }
+        }
 
         function toggleLoginUsernameField() {
             const role = document.getElementById('loginRole').value;
@@ -568,7 +592,7 @@
                     <td><strong>${u.name}</strong></td>
                     <td>${u.role.toUpperCase()}</td>
                     <td><code>${u.pass}</code></td>
-                    <td><button class="btn-danger" style="margin:0; padding:2px 6px; font-size:11px;" onclick="deleteUser('${u.id}')">Delete</button></td>`;
+                    <td><button class="btn-danger" style="margin:0; padding:2px 6px; font-size:11px;" onclick="deleteUser('${u.id}')">Delete Account</button></td>`;
                 tbody.appendChild(r);
             });
         }
@@ -595,6 +619,7 @@
 
         function updateRoomDropdown() {
             const select = document.getElementById('pRoom');
+            if(!select) return;
             select.innerHTML = '<option value="" disabled selected>Choose Available Bed...</option>';
             for(let r in state.rooms) {
                 if(!state.rooms[r]) {
@@ -666,7 +691,6 @@
             for(let rName in state.rooms) {
                 const p = state.rooms[rName]; const card = document.createElement('div');
                 
-                // Determine Shake Criteria based on user roles and tracking milestones
                 let isShaking = false;
                 if(p && !p.codeBlue) {
                     if(p.status === "Admitted" && sessionUser.role === 'doctor' && sessionUser.name === p.assignedDoctor) {
@@ -742,7 +766,6 @@
                 <p><strong>Diagnostics/Labs summary:</strong> ${p.labsSummary || 'Awaiting Action'}</p>
                 <p><strong>Discharge Context:</strong> ${p.dischargeNotes || 'None'}</p><p><strong>Outpatient Specialist Referral:</strong> ${p.referralSpecialty || 'None'}</p>`;
 
-            // Toggle operational sub panels inside the modal display ecosystem
             document.getElementById('modalDoctorActions').style.display = (sessionUser.role === 'doctor' && sessionUser.name === p.assignedDoctor) ? 'block' : 'none';
             document.getElementById('modalLabActions').style.display = (sessionUser.role === 'labs') ? 'block' : 'none';
             document.getElementById('modalAdmissionActions').style.display = (sessionUser.role === 'admission' && p.status === "Awaiting Admission Desk Discharge Confirmation") ? 'block' : 'none';
@@ -758,7 +781,6 @@
                 document.getElementById('mdDischargeNotesText').value = p.dischargeNotes;
                 document.getElementById('mdReferralSelect').value = p.referralSpecialty;
                 
-                // Allow initiating discharge if prescription is detailed
                 document.getElementById('btnDischargeExecution').style.display = (p.rx.trim() !== "" && p.status !== "Awaiting Admission Desk Discharge Confirmation") ? "block" : "none";
             }
             if(sessionUser.role === 'labs') {

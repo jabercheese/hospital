@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -15,6 +14,7 @@
             --bg-dark: #0f172a;
             --bg-light: #f8fafc;
             --primary: #2563eb;
+            --manager-color: #a855f7;
         }
 
         body {
@@ -25,6 +25,27 @@
             color: #1e293b;
         }
 
+        /* --- LOG IN SYSTEM OVERLAY --- */
+        #loginOverlay {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: radial-gradient(circle at top right, #1e293b, #0f172a);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+        .login-card {
+            background: white;
+            padding: 35px;
+            border-radius: 12px;
+            width: 360px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+        .login-card h1 { margin: 0 0 5px 0; font-size: 20px; color: var(--bg-dark); text-align: center; }
+        .login-card p { margin: 0 0 20px 0; font-size: 12px; color: #64748b; text-align: center; }
+
+        /* --- MAIN ARCHITECTURE --- */
         header {
             background-color: var(--bg-dark);
             color: white;
@@ -35,30 +56,20 @@
             justify-content: space-between;
             align-items: center;
         }
-
-        /* Role Switcher Toolbar */
-        .role-bar {
-            background: #e2e8f0;
-            padding: 10px;
-            border-radius: 6px;
-            margin-bottom: 20px;
+        .user-badge {
+            background: rgba(255,255,255,0.15);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
             display: flex;
-            gap: 10px;
             align-items: center;
+            gap: 12px;
         }
-        .role-btn {
-            padding: 8px 16px;
-            border: none;
-            background: #cbd5e1;
-            cursor: pointer;
-            font-weight: bold;
-            border-radius: 4px;
-            transition: all 0.2s;
+        .logout-btn {
+            background: #ef4444; color: white; border: none;
+            padding: 4px 10px; border-radius: 4px; cursor: pointer; font-weight: bold;
         }
-        .role-btn.active {
-            background: var(--primary);
-            color: white;
-        }
+        .logout-btn:hover { background: #dc2626; }
 
         .dashboard-layout {
             display: grid;
@@ -75,7 +86,7 @@
         }
 
         h2 { margin-top: 0; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; font-size: 18px; color: var(--bg-dark); }
-        h3 { font-size: 15px; margin: 10px 0 5px 0; color: #475569;}
+        h3 { font-size: 14px; margin: 15px 0 5px 0; color: #475569;}
 
         .form-group { margin-bottom: 12px; }
         label { display: block; font-weight: 600; margin-bottom: 4px; font-size: 13px; }
@@ -91,11 +102,8 @@
         .btn-secondary { background-color: #64748b; }
         .btn-secondary:hover { background-color: #475569; }
 
-        /* Code Blue Callout */
-        .btn-code-blue {
-            background-color: #1e40af;
-            animation: pulse-blue 2s infinite;
-        }
+        /* Code Blue Dynamic Alert */
+        .btn-code-blue { background-color: #1e40af; animation: pulse-blue 2s infinite; }
         @keyframes pulse-blue {
             0% { box-shadow: 0 0 0 0 rgba(30, 64, 175, 0.7); }
             70% { box-shadow: 0 0 0 10px rgba(30, 64, 175, 0); }
@@ -103,20 +111,10 @@
         }
 
         /* ER Rooms Grid */
-        .rooms-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-            gap: 15px;
-        }
-
+        .rooms-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 15px; }
         .room-card {
-            background: #ffffff;
-            border-left: 8px solid #cbd5e1;
-            border-radius: 6px;
-            padding: 15px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-            transition: all 0.2s;
-            position: relative;
+            background: #ffffff; border-left: 8px solid #cbd5e1; border-radius: 6px;
+            padding: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); position: relative;
         }
 
         .urgency-1 { border-left-color: var(--level1); }
@@ -125,7 +123,6 @@
         .urgency-4 { border-left-color: var(--level4); }
         .urgency-5 { border-left-color: var(--level5); }
 
-        /* Code Blue Dynamic Animation Styles */
         .code-blue-active {
             animation: shake 0.3s infinite, blink-blue-bg 0.5s infinite alternate !important;
             border-left-color: #0000ff !important;
@@ -157,10 +154,7 @@
         }
         .patient-clickable:hover { background: #e2e8f0; color: var(--primary); }
 
-        .clinical-box {
-            background: #fafafa; border: 1px solid #e2e8f0; border-radius: 4px;
-            padding: 8px; margin-bottom: 6px; font-size: 12px;
-        }
+        .clinical-box { background: #fafafa; border: 1px solid #e2e8f0; border-radius: 4px; padding: 8px; margin-bottom: 6px; font-size: 12px; }
         .clinical-box strong { color: #475569; display: block; margin-bottom: 2px;}
 
         /* Modals */
@@ -169,7 +163,7 @@
             display: flex; justify-content: center; align-items: center; z-index: 1000; visibility: hidden;
         }
         .modal-overlay.active { visibility: visible; }
-        .modal-content { background: white; padding: 25px; border-radius: 8px; width: 450px; max-height: 85vh; overflow-y: auto; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); }
+        .modal-content { background: white; padding: 25px; border-radius: 8px; width: 450px; max-height: 85vh; overflow-y: auto; }
 
         table { width: 100%; border-collapse: collapse; margin-top: 15px; background: white;}
         th, td { padding: 10px; text-align: left; border-bottom: 1px solid #e2e8f0; font-size: 12px; }
@@ -178,124 +172,144 @@
 </head>
 <body>
 
-    <header>
-        <h1>Emergency Command Center</h1>
-        <div id="activeRoleDisplay" style="font-weight: bold; color: #38bdf8;">Current Portal: Admission Officer</div>
-    </header>
+    <div id="loginOverlay">
+        <div class="login-card">
+            <h1>Clinical Access Gateway</h1>
+            <p>Please provide credentials to unlock the terminal room matrix.</p>
+            
+            <div class="form-group">
+                <label>User Role Profile</label>
+                <select id="loginRole" onchange="toggleLoginUsernameField()">
+                    <option value="admission">Admission Officer (Adm Ofic)</option>
+                    <option value="doctor">Medical Practitioner (Doctor)</option>
+                    <option value="labs">Laboratory Technician (Lab Tech)</option>
+                    <option value="manager">System Administrator (Manager)</option>
+                </select>
+            </div>
 
-    <div class="role-bar">
-        <span><strong>Access Gateway:</strong></span>
-        <button class="role-btn active" id="btn-role-admission" onclick="switchPortal('admission')">Admission Portal</button>
-        <button class="role-btn" id="btn-role-doctor" onclick="switchPortal('doctor')">Doctor Portal</button>
-        <button class="role-btn" id="btn-role-labs" onclick="switchPortal('labs')">Laboratory Portal</button>
-        <button class="role-btn" id="btn-role-manager" onclick="switchPortal('manager')" style="background-color: #a855f7; color: white;">Manager Portal</button>
+            <div class="form-group" id="loginUserWrapper">
+                <label>User Identifier / Name</label>
+                <input type="text" id="loginUsername" placeholder="e.g., Jane Doe">
+            </div>
+
+            <div class="form-group">
+                <label>Security Access Passcode</label>
+                <input type="password" id="loginPassword" placeholder="••••">
+            </div>
+
+            <button onclick="attemptAuthentication()">Authenticate Credentials</button>
+        </div>
     </div>
 
-    <div class="dashboard-layout">
-        <div class="left-column">
-            
-            <div id="panel-admission" class="panel portal-workspace">
-                <h2>New Intake Triage</h2>
+    <div id="appContent" style="display:none;">
+        <header>
+            <h1>Emergency Command Center</h1>
+            <div class="user-badge">
+                <span id="activeUserLabel">Logged in: Unknown User</span>
+                <button class="logout-btn" onclick="executeLogout()">Sign Out</button>
+            </div>
+        </header>
+
+        <div class="dashboard-layout">
+            <div class="left-column">
                 
-                <div style="background: #f0fdf4; border: 1px solid #bbf7d0; padding: 8px; border-radius: 4px; margin-bottom: 15px;">
-                    <label><strong>Retrieve Registered Patient Data:</strong></label>
-                    <input type="text" id="searchQuery" placeholder="Enter Hospital ID or Last Name" style="margin-bottom: 5px;">
-                    <input type="date" id="searchDob" placeholder="Verify DOB if searching by Name" style="margin-bottom: 5px;">
-                    <button type="button" class="btn-secondary" onclick="lookupPatient()" style="padding:4px; font-size:12px;">Query Records</button>
+                <div id="panel-admission" class="panel portal-workspace" style="display:none;">
+                    <h2>New Intake Triage</h2>
+                    <div style="background: #f0fdf4; border: 1px solid #bbf7d0; padding: 8px; border-radius: 4px; margin-bottom: 15px;">
+                        <label><strong>Retrieve Registered Patient Data:</strong></label>
+                        <input type="text" id="searchQuery" placeholder="Enter Hospital ID or Last Name" style="margin-bottom: 5px;">
+                        <input type="date" id="searchDob" placeholder="Verify DOB if searching by Name" style="margin-bottom: 5px;">
+                        <button type="button" class="btn-secondary" onclick="lookupPatient()" style="padding:4px; font-size:12px;">Query Records</button>
+                    </div>
+
+                    <form id="admissionForm">
+                        <div class="form-group"> <label>First Name</label><input type="text" id="pFirstName" required> </div>
+                        <div class="form-group"> <label>Last Name</label><input type="text" id="pLastName" required> </div>
+                        <div class="form-group"> 
+                            <label>Date of Birth</label>
+                            <input type="date" id="pDob" onchange="calculateFormAge()" required>
+                            <small id="calculatedAgeForm" style="color: var(--primary); font-weight: bold;"></small>
+                        </div>
+                        <div class="form-group"> <label>Insurance ID (Optional)</label><input type="text" id="pInsurance"> </div>
+                        <div class="form-group"> <label>Symptoms / Chief Complaint</label><textarea id="pSymptoms" rows="2" required></textarea> </div>
+                        <div class="form-group">
+                            <label>Trauma Classification</label>
+                            <select id="pUrgency">
+                                <option value="1">Level 1: IMMEDIATE - LIFE THREATENING</option>
+                                <option value="2">Level 2: Very Urgent</option>
+                                <option value="3">Level 3: Urgent</option>
+                                <option value="4">Level 4: Standard</option>
+                                <option value="5">Level 5: Non-Urgent</option>
+                            </select>
+                        </div>
+                        <div class="form-group"> <label>Allocation Destination</label><select id="pRoom" required></select> </div>
+                        <button type="submit">Complete Intake & Bed Assign</button>
+                    </form>
                 </div>
 
-                <form id="admissionForm">
-                    <div class="form-group">
-                        <label>First Name</label>
-                        <input type="text" id="pFirstName" required>
+                <div id="panel-clinical-info" class="panel portal-workspace" style="display:none;">
+                    <h2>Clinical Operations Area</h2>
+                    <p style="font-size:13px; color: #64748b;">Please select a patient chart inside an active ER bay room on the dashboard to review diagnostics, record notes, provide prescriptions, or process discharges.</p>
+                </div>
+
+                <div id="panel-manager" class="panel portal-workspace" style="display:none;">
+                    <h2>System Control Manager Dashboard</h2>
+                    <div class="form-group" style="background:#fef08a; padding:10px; border-radius:6px; border:1px solid #fef08a;">
+                        <label><strong>Manager Base Login Password Config:</strong></label>
+                        <input type="text" id="mgrPasscodeField" style="background:white;">
+                        <button style="background:black;" onclick="updateManagerPasscode()">Change Manager Passcode</button>
                     </div>
+                    <hr>
+                    <h3>Authorize & Add User Account</h3>
                     <div class="form-group">
-                        <label>Last Name</label>
-                        <input type="text" id="pLastName" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Date of Birth</label>
-                        <input type="date" id="pDob" onchange="calculateFormAge()" required>
-                        <small id="calculatedAgeForm" style="color: var(--primary); font-weight: bold;"></small>
-                    </div>
-                    <div class="form-group">
-                        <label>Insurance ID (Optional)</label>
-                        <input type="text" id="pInsurance">
-                    </div>
-                    <div class="form-group">
-                        <label>Symptoms / Chief Complaint</label>
-                        <textarea id="pSymptoms" rows="2" required></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label>Trauma Classification</label>
-                        <select id="pUrgency">
-                            <option value="1">Level 1: IMMEDIATE - LIFE THREATENING</option>
-                            <option value="2">Level 2: Very Urgent</option>
-                            <option value="3">Level 3: Urgent</option>
-                            <option value="4">Level 4: Standard</option>
-                            <option value="5">Level 5: Non-Urgent</option>
+                        <label>User Role Profile Type</label>
+                        <select id="mgmtRoleType">
+                            <option value="doctor">Doctor</option>
+                            <option value="admission">Admission Officer</option>
+                            <option value="labs">Lab Technician</option>
                         </select>
                     </div>
                     <div class="form-group">
-                        <label>Allocation Destination</label>
-                        <select id="pRoom" required></select>
+                        <label>User Full Legal Name</label>
+                        <input type="text" id="mgmtName" placeholder="Dr. John Doe, MD / Officer Smith">
                     </div>
-                    <button type="submit">Complete Intake & Bed Assign</button>
-                </form>
-            </div>
+                    <div class="form-group">
+                        <label>Assigned Custom Security Passcode</label>
+                        <input type="text" id="mgmtPass" placeholder="Enter custom user access code">
+                    </div>
+                    <button class="btn-secondary" onclick="createNewUser()">Create Account</button>
 
-            <div id="panel-clinical-info" class="panel portal-workspace" style="display:none;">
-                <h2>Clinical Operations Mode</h2>
-                <p style="font-size:13px; color: #64748b;">Please click a patient card inside an active ER room bay to perform dynamic interactions, evaluate records, authorize diagnostic routing paths, log treatments, or dispatch clinical release forms.</p>
-            </div>
-
-            <div id="panel-manager" class="panel portal-workspace" style="display:none;">
-                <h2>System Manager Controls</h2>
-                <div class="form-group">
-                    <label>Master Passcode Config</label>
-                    <input type="text" id="mgrPasscodeField" value="1234">
-                    <button onclick="updateMasterPasscode()">Update Passcode</button>
+                    <h3>Registered Staff Accounts & Passcodes</h3>
+                    <table style="width:100%; font-size:11px;">
+                        <thead><tr><th>Name</th><th>Role</th><th>Passcode</th></tr></thead>
+                        <tbody id="managerUserTableBody"></tbody>
+                    </table>
                 </div>
-                <hr>
-                <div class="form-group">
-                    <label>Authorize New Medical Practitioner Name</label>
-                    <input type="text" id="newDocName" placeholder="Dr. Jennifer Evans, MD">
-                    <button class="btn-secondary" onclick="addDoctor()">Authorize Doctor</button>
-                </div>
-                <h3>Active Roster Staff</h3>
-                <ul id="managerDocList" style="font-size:13px; padding-left: 20px;"></ul>
+
             </div>
 
+            <div class="right-column">
+                <div class="panel">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                        <h2 style="margin:0; border:none;">Live Emergency Bed Matrix</h2>
+                        <button class="btn-danger btn-code-blue" style="width: auto; padding: 6px 12px; font-size:12px;" onclick="triggerGlobalCodeBlue()">TRIGGER GENERAL CODE BLUE</button>
+                    </div>
+                    <div class="rooms-grid" id="roomsGrid"></div>
+                </div>
+            </div>
         </div>
 
-        <div class="right-column">
-            <div class="panel">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                    <h2 style="margin:0; border:none;">Live Emergency Bed Matrix</h2>
-                    <button class="btn-danger btn-code-blue" style="width: auto; padding: 6px 12px; font-size:12px;" onclick="triggerGlobalCodeBlue()">TRIGGER ACTIVE CODE BLUE</button>
-                </div>
-                <div class="rooms-grid" id="roomsGrid"></div>
-            </div>
+        <div class="panel">
+            <h2>Permanent Longitudinal Clinical Records Vault</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Patient ID</th><th>Name</th><th>Age/DOB</th><th>Symptoms</th><th>Dx (Diagnosis)</th><th>Labs Summary</th><th>Rx Medications</th><th>Discharge Status & Referrals</th>
+                    </tr>
+                </thead>
+                <tbody id="historyTableBody"></tbody>
+            </table>
         </div>
-    </div>
-
-    <div class="panel">
-        <h2>Permanent Longitudinal Clinical Records Vault</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>Patient ID</th>
-                    <th>Name</th>
-                    <th>Age/DOB</th>
-                    <th>Symptoms</th>
-                    <th>Dx (Diagnosis)</th>
-                    <th>Labs Summary</th>
-                    <th>Rx Medications</th>
-                    <th>Discharge Status & Referrals</th>
-                </tr>
-            </thead>
-            <tbody id="historyTableBody"></tbody>
-        </table>
     </div>
 
     <div class="modal-overlay" id="secureModal">
@@ -305,14 +319,8 @@
                 <button onclick="closeModal()" style="width:auto; margin:0; padding:4px 8px; background:#ef4444;">X</button>
             </div>
             
-            <div id="modalAuthGate">
-                <p style="font-size:13px; margin: 15px 0 5px 0; color:#ef4444; font-weight:bold;">🔒 Clinical Security Clearance Required</p>
-                <input type="password" id="gatePasscodeInput" placeholder="Enter System Passcode" style="margin-bottom:10px;">
-                <button onclick="verifyGatePasscode()">Authenticate Identity</button>
-            </div>
-
-            <div id="modalDocVerificationGate" style="display:none;">
-                <p style="font-size:13px; margin:15px 0 5px 0; font-weight:bold; color:var(--primary);">Identity Confirmed. Verify Patient DOB to unlock Chart:</p>
+            <div id="modalDocVerificationGate" style="display:none; margin: 20px 0;">
+                <p style="font-size:13px; font-weight:bold; color:var(--primary);">Identity Check: Verify Patient DOB to unlock Chart:</p>
                 <input type="date" id="verifyDocInputDob" style="margin-bottom:10px;">
                 <button onclick="verifyPatientDobForDoctor()">Verify Patient Identity</button>
                 <p style="text-align:center; margin:8px 0; font-size:11px; color:#64748b;">- OR -</p>
@@ -322,10 +330,10 @@
             <div id="modalSecureBody" style="display:none; margin-top:15px;">
                 <div id="patientMetaProfile" style="background:#f1f5f9; padding:10px; border-radius:6px; font-size:12px; margin-bottom:15px;"></div>
                 
-                <div id="modalDoctorActions" class="clinical-box" style="border-color: #3b82f6;">
+                <div id="modalDoctorActions" class="clinical-box" style="border-color: #3b82f6; display:none;">
                     <strong>Attending Physician Panel</strong>
                     <div class="form-group">
-                        <label>Update Clinical Status Tracker</label>
+                        <label>Update Status Tracker</label>
                         <select id="mdStatusSelect">
                             <option value="Getting checked">Getting checked</option>
                             <option value="Awaiting Labs">Awaiting Labs</option>
@@ -336,25 +344,12 @@
                     <div class="form-group">
                         <label>Triage Urgency Override</label>
                         <select id="mdUrgencySelect">
-                            <option value="1">Level 1: Immediate</option>
-                            <option value="2">Level 2: Very Urgent</option>
-                            <option value="3">Level 3: Urgent</option>
-                            <option value="4">Level 4: Standard</option>
-                            <option value="5">Level 5: Non-Urgent</option>
+                            <option value="1">Level 1: Immediate</option><option value="2">Level 2: Very Urgent</option><option value="3">Level 3: Urgent</option><option value="4">Level 4: Standard</option><option value="5">Level 5: Non-Urgent</option>
                         </select>
                     </div>
-                    <div class="form-group">
-                        <label>Diagnosis (Dx) Entry</label>
-                        <textarea id="mdDxText" rows="2"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label>Prescribe Therapeutics & Medication Plans (Rx)</label>
-                        <textarea id="mdRxText" rows="2"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label>Clinical Discharge Officer Notes</label>
-                        <textarea id="mdDischargeNotesText" rows="2"></textarea>
-                    </div>
+                    <div class="form-group"><label>Diagnosis (Dx) Entry</label><textarea id="mdDxText" rows="2"></textarea></div>
+                    <div class="form-group"><label>Prescribe Therapeutics & Medication Plans (Rx)</label><textarea id="mdRxText" rows="2"></textarea></div>
+                    <div class="form-group"><label>Clinical Discharge Notes</label><textarea id="mdDischargeNotesText" rows="2"></textarea></div>
                     <div class="form-group">
                         <label>Outpatient Specialist Referral Route</label>
                         <select id="mdReferralSelect">
@@ -363,30 +358,28 @@
                             <option value="Neurologist">Neurology Specialist</option>
                             <option value="Orthopedic Surgeon">Orthopedic Surgery</option>
                             <option value="Oncologist">Oncology</option>
-                            <option value="Pediatrician">Pediatrics</option>
                             <option value="Gastroenterologist">Gastroenterology</option>
-                            <option value="Nephrologist">Nephrology</option>
                         </select>
                     </div>
                     <button onclick="submitDoctorUpdates()">Commit Medical Records</button>
-                    <button class="btn-danger" id="btnDischargeExecution" onclick="executeDischarge()" style="margin-top:8px; display:none;">Authorize Complete Discharge & Clear Bed</button>
+                    <button class="btn-danger" id="btnDischargeExecution" onclick="executeDischarge()" style="margin-top:8px; display:none;">Authorize Discharge & Clear Bed</button>
                 </div>
 
-                <div id="modalLabActions" class="clinical-box" style="border-color: #eab308;">
+                <div id="modalLabActions" class="clinical-box" style="border-color: #eab308; display:none;">
                     <strong>Pathology & Laboratory Diagnostic Workspace</strong>
                     <div class="form-group">
                         <label>Lab Findings Summary / Diagnostics Text</label>
-                        <textarea id="labSummaryText" rows="3" placeholder="Input bloodwork counts, metabolic panels, toxicology, or imaging notes..."></textarea>
+                        <textarea id="labSummaryText" rows="3" placeholder="Input bloodwork counts, metabolic panels, or imaging notes..."></textarea>
                     </div>
                     <button style="background-color:#eab308; color:black;" onclick="submitLabResults()">Submit Findings & Set Status: "Labs Complete"</button>
                 </div>
 
                 <div class="clinical-box">
-                    <strong>Current Active Clinical Data Chart</strong>
+                    <strong>Current Active Patient Chart Log</strong>
                     <div id="chartDisplayData"></div>
                 </div>
 
-                <div class="form-group" style="margin-top:10px;">
+                <div class="form-group" style="margin-top:10px;" id="modalCodeBlueWrapper">
                     <button class="btn-danger" id="modalCodeBlueBtn" onclick="toggleRoomCodeBlueFromModal()">ACTIVATE ROOM CODE BLUE ALERT</button>
                 </div>
             </div>
@@ -394,92 +387,148 @@
     </div>
 
     <script>
-        // CONFIG & APPLICATION STATE
         const TOTAL_ROOMS = 10;
-        let currentPortal = 'admission'; 
         let activeSelectedRoomName = null;
 
-        // DB State objects loaded via localStorage or Defaults
+        // AUTH CONTEXT POINTERS
+        let sessionUser = { name: null, role: null };
+
+        // PERSISTENT DATA LAYER STATE OBJECTS
         let state = {
-            masterPasscode: "1234",
-            doctors: ["Dr. Gregory House, MD", "Dr. Meredith Grey, MD", "Dr. John Watson, MD"],
-            patientsLog: [], 
+            managerPasscode: "1234",
+            users: [
+                { name: "Dr. Gregory House, MD", role: "doctor", pass: "1234" },
+                { name: "Dr. Meredith Grey, MD", role: "doctor", pass: "1234" },
+                { name: "Officer Smith", role: "admission", pass: "1234" },
+                { name: "Lab Tech Alpha", role: "labs", pass: "1234" }
+            ],
+            patientsLog: [],
             rooms: {}
         };
 
-        // Initialize empty room allocations
-        for(let i = 1; i <= TOTAL_ROOMS; i++) {
-            state.rooms[`Room ${i}`] = null;
-        }
+        for(let i = 1; i <= TOTAL_ROOMS; i++) { state.rooms[`Room ${i}`] = null; }
+        const urgencyLabels = { 1: "Lvl 1: IMMEDIATE", 2: "Lvl 2: Very Urgent", 3: "Lvl 3: Urgent", 4: "Lvl 4: Standard", 5: "Lvl 5: Non-Urgent" };
 
-        const urgencyLabels = {
-            1: "Lvl 1: IMMEDIATE", 2: "Lvl 2: Very Urgent", 3: "Lvl 3: Urgent", 4: "Lvl 4: Standard", 5: "Lvl 5: Non-Urgent"
-        };
-
-        // STATE LIFECYCLE MANAGEMENT
-        function loadState() {
-            const data = localStorage.getItem('ER_COMMAND_STATE_2026');
-            if(data) {
-                try {
-                    const parsed = JSON.parse(data);
-                    if(parsed.masterPasscode) state.masterPasscode = parsed.masterPasscode;
-                    if(parsed.doctors) state.doctors = parsed.doctors;
-                    if(parsed.patientsLog) state.patientsLog = parsed.patientsLog;
-                    if(parsed.rooms) {
-                        // Ensure layout shape safety across sessions
-                        for(let r in state.rooms) {
-                            if(parsed.rooms[r] !== undefined) state.rooms[r] = parsed.rooms[r];
-                        }
-                    }
-                } catch(e) { console.error("State recovery anomaly: ", e); }
-            }
-            saveState();
-        }
-
-        function saveState() {
-            localStorage.setItem('ER_COMMAND_STATE_2026', JSON.stringify(state));
-        }
-
-        // APP INITIALIZER
+        // INITIALIZER RUNNERS
         function init() {
-            loadState();
-            switchPortal('admission');
-            updateRoomDropdown();
+            const recovered = localStorage.getItem('ER_COMMAND_STATE_SECURE_2026');
+            if(recovered) {
+                try {
+                    const parsed = JSON.parse(recovered);
+                    if(parsed.managerPasscode) state.managerPasscode = parsed.managerPasscode;
+                    if(parsed.users) state.users = parsed.users;
+                    if(parsed.patientsLog) state.patientsLog = parsed.patientsLog;
+                    if(parsed.rooms) { for(let r in state.rooms) { if(parsed.rooms[r] !== undefined) state.rooms[r] = parsed.rooms[r]; } }
+                } catch(e) { console.error(e); }
+            }
+            localStorage.setItem('ER_COMMAND_STATE_SECURE_2026', JSON.stringify(state));
+            toggleLoginUsernameField();
             renderRoomsGrid();
             renderHistoryTable();
-            renderManagerDoctors();
         }
 
-        // PORTAL ROUTER NAVIGATION 
-        function switchPortal(role) {
-            currentPortal = role;
-            document.querySelectorAll('.role-btn').forEach(btn => btn.classList.remove('active'));
-            document.querySelectorAll('.portal-workspace').forEach(p => p.style.display = 'none');
-            
-            document.getElementById(`btn-role-${role}`).classList.add('active');
-            document.getElementById('activeRoleDisplay').textContent = `Current Portal: ${role.toUpperCase()} CONSOLE`;
+        function saveState() { localStorage.setItem('ER_COMMAND_STATE_SECURE_2026', JSON.stringify(state)); }
 
+        // AUTH MECHANISM CONTROLLERS
+        function toggleLoginUsernameField() {
+            const role = document.getElementById('loginRole').value;
+            document.getElementById('loginUserWrapper').style.display = (role === 'manager') ? 'none' : 'block';
+        }
+
+        function attemptAuthentication() {
+            const role = document.getElementById('loginRole').value;
+            const pass = document.getElementById('loginPassword').value.trim();
+            const username = document.getElementById('loginUsername').value.trim();
+
+            if(role === 'manager') {
+                if(pass === state.managerPasscode) {
+                    authorizeSession("System Administrator", "manager");
+                } else { alert("Access Denied: Invalid Master Passcode."); }
+            } else {
+                if(!username) { alert("Please provide a valid user account identifier."); return; }
+                const matchedUser = state.users.find(u => u.role === role && u.name.toLowerCase() === username.toLowerCase() && u.pass === pass);
+                
+                if(matchedUser) {
+                    authorizeSession(matchedUser.name, matchedUser.role);
+                } else { alert("Authentication Failure: Account details do not match active registry."); }
+            }
+        }
+
+        function authorizeSession(name, role) {
+            sessionUser.name = name;
+            sessionUser.role = role;
+
+            document.getElementById('loginOverlay').style.display = 'none';
+            document.getElementById('appContent').style.display = 'block';
+            document.getElementById('activeUserLabel').textContent = `Logged in: ${name} [${role.toUpperCase()}]`;
+
+            // Clear inputs
+            document.getElementById('loginPassword').value = "";
+            document.getElementById('loginUsername').value = "";
+
+            // Toggle role-specific workspace views
+            document.querySelectorAll('.portal-workspace').forEach(p => p.style.display = 'none');
             if(role === 'admission') {
                 document.getElementById('panel-admission').style.display = 'block';
             } else if(role === 'manager') {
                 document.getElementById('panel-manager').style.display = 'block';
+                document.getElementById('mgrPasscodeField').value = state.managerPasscode;
+                renderManagerAccountsTable();
             } else {
                 document.getElementById('panel-clinical-info').style.display = 'block';
             }
+
+            updateRoomDropdown();
             renderRoomsGrid();
         }
 
-        // CHRONOLOGICAL AGE CALCULATOR ENGINE
+        function executeLogout() {
+            sessionUser = { name: null, role: null };
+            document.getElementById('appContent').style.display = 'none';
+            document.getElementById('loginOverlay').style.display = 'flex';
+            toggleLoginUsernameField();
+        }
+
+        // ADMINISTRATIVE USER ACCOUNT CONTROLLERS
+        function createNewUser() {
+            const role = document.getElementById('mgmtRoleType').value;
+            const name = document.getElementById('mgmtName').value.trim();
+            const pass = document.getElementById('mgmtPass').value.trim();
+
+            if(!name || !pass) { alert("All user registration parameters are required."); return; }
+            state.users.push({ name, role, pass });
+            saveState();
+            renderManagerAccountsTable();
+
+            document.getElementById('mgmtName').value = "";
+            document.getElementById('mgmtPass').value = "";
+            alert(`Account for ${name} [${role}] created successfully.`);
+        }
+
+        function renderManagerAccountsTable() {
+            const tbody = document.getElementById('managerUserTableBody');
+            tbody.innerHTML = '';
+            state.users.forEach(u => {
+                let r = document.createElement('tr');
+                r.innerHTML = `<td><strong>${u.name}</strong></td><td>${u.role.toUpperCase()}</td><td><code>${u.pass}</code></td>`;
+                tbody.appendChild(r);
+            });
+        }
+
+        function updateManagerPasscode() {
+            const code = document.getElementById('mgrPasscodeField').value.trim();
+            if(code) { state.managerPasscode = code; saveState(); alert("Master Admin passcode modified."); }
+        }
+
+        // CLINICAL SYSTEM ENGINE MODULES
         function calculateAge(dobString) {
             if(!dobString) return "N/A";
             const birthDate = new Date(dobString);
             const today = new Date();
             let age = today.getFullYear() - birthDate.getFullYear();
             const m = today.getMonth() - birthDate.getMonth();
-            if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
-                age--;
-            }
-            return age >= 0 ? `${age} Y/O` : "Newborn/Infant";
+            if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) { age--; }
+            return age >= 0 ? `${age} Y/O` : "Infant";
         }
 
         function calculateFormAge() {
@@ -487,16 +536,6 @@
             document.getElementById('calculatedAgeForm').textContent = dob ? `Calculated Age: ${calculateAge(dob)}` : "";
         }
 
-        // AUTO-GENERATOR ID SEQUENCE
-        function generatePatientID() {
-            let randStr = '';
-            for(let i = 0; i < 5; i++) {
-                randStr += Math.floor(Math.random() * 10);
-            }
-            return `ER-${randStr}`;
-        }
-
-        // DOM UTILITY COMPONENT POPULATORS
         function updateRoomDropdown() {
             const select = document.getElementById('pRoom');
             select.innerHTML = '<option value="" disabled selected>Choose Available Bed...</option>';
@@ -509,59 +548,20 @@
             }
         }
 
-        function renderManagerDoctors() {
-            const ul = document.getElementById('managerDocList');
-            ul.innerHTML = '';
-            state.doctors.forEach(doc => {
-                let li = document.createElement('li');
-                li.textContent = doc;
-                ul.appendChild(li);
-            });
-        }
-
-        function addDoctor() {
-            const input = document.getElementById('newDocName');
-            if(input.value.trim()) {
-                state.doctors.push(input.value.trim());
-                input.value = "";
-                saveState();
-                renderManagerDoctors();
-                alert("New Medical Practitioner authorized successfully.");
-            }
-        }
-
-        function updateMasterPasscode() {
-            const code = document.getElementById('mgrPasscodeField').value.trim();
-            if(code) {
-                state.masterPasscode = code;
-                saveState();
-                alert(`Master Passcode successfully updated to: ${code}`);
-            }
-        }
-
-        // PRE-EXISTING RECORDS RETRIEVAL SYSTEM
         function lookupPatient() {
             const query = document.getElementById('searchQuery').value.trim().toLowerCase();
             const dobVerify = document.getElementById('searchDob').value;
-
-            if(!query) {
-                alert("Please supply either a distinct Patient ID or Last Name to query database archives.");
-                return;
-            }
+            if(!query) { alert("Please provide a search parameter."); return; }
 
             let foundMatch = null;
             const isIDSearch = query.startsWith('er-');
 
             for(let i = state.patientsLog.length - 1; i >= 0; i--) {
                 let p = state.patientsLog[i];
-                if(isIDSearch) {
-                    if(p.id.toLowerCase() === query) { foundMatch = p; break; }
-                } else {
+                if(isIDSearch) { if(p.id.toLowerCase() === query) { foundMatch = p; break; } } 
+                else {
                     if(p.lastName.toLowerCase() === query) {
-                        if(!dobVerify) {
-                            alert("Identity safety standard protocol mismatch: Verification of Date of Birth is strictly required when querying matching last names.");
-                            return;
-                        }
+                        if(!dobVerify) { alert("DOB verification required when searching by last name."); return; }
                         if(p.dob === dobVerify) { foundMatch = p; break; }
                     }
                 }
@@ -574,36 +574,24 @@
                 document.getElementById('pInsurance').value = foundMatch.insurance;
                 document.getElementById('pSymptoms').value = foundMatch.symptoms;
                 calculateFormAge();
-                alert(`Success: Retrived record file [${foundMatch.id}] into current workspace.`);
-            } else {
-                alert("No archival records match the provided verification properties.");
-            }
+                alert(`Found: Records recovered for ${foundMatch.firstName} [${foundMatch.id}].`);
+            } else { alert("No matching data found in history log archives."); }
         }
 
-        // INTAKE SUBMISSION LOGIC
         document.getElementById('admissionForm').addEventListener('submit', function(e) {
             e.preventDefault();
             const roomTarget = document.getElementById('pRoom').value;
-            if(!roomTarget || state.rooms[roomTarget]) {
-                alert("Target bed allocation conflict. Select an alternate open room.");
-                return;
-            }
+            if(!roomTarget || state.rooms[roomTarget]) { alert("Allocation conflict."); return; }
 
             const newPatient = {
-                id: generatePatientID(),
+                id: `ER-${Math.floor(10000 + Math.random() * 90000)}`,
                 firstName: document.getElementById('pFirstName').value.trim(),
                 lastName: document.getElementById('pLastName').value.trim(),
                 dob: document.getElementById('pDob').value,
                 insurance: document.getElementById('pInsurance').value.trim() || "N/A",
                 symptoms: document.getElementById('pSymptoms').value.trim(),
                 urgency: parseInt(document.getElementById('pUrgency').value),
-                status: "Admitted",
-                diagnosis: "",
-                labsSummary: "",
-                rx: "",
-                dischargeNotes: "",
-                referralSpecialty: "",
-                codeBlue: false
+                status: "Admitted", diagnosis: "", labsSummary: "", rx: "", dischargeNotes: "", referralSpecialty: "", codeBlue: false
             };
 
             state.rooms[roomTarget] = newPatient;
@@ -612,284 +600,157 @@
 
             document.getElementById('admissionForm').reset();
             document.getElementById('calculatedAgeForm').textContent = "";
-            
-            updateRoomDropdown();
-            renderRoomsGrid();
-            renderHistoryTable();
+            updateRoomDropdown(); renderRoomsGrid(); renderHistoryTable();
         });
 
-        // RENDER LIVE ROOM TRACKING CELLS
         function renderRoomsGrid() {
-            const grid = document.getElementById('roomsGrid');
-            grid.innerHTML = '';
-
+            const grid = document.getElementById('roomsGrid'); grid.innerHTML = '';
             for(let rName in state.rooms) {
-                const p = state.rooms[rName];
-                const card = document.createElement('div');
+                const p = state.rooms[rName]; const card = document.createElement('div');
                 card.className = `room-card ${p ? 'urgency-' + p.urgency : ''} ${p && p.codeBlue ? 'code-blue-active' : ''}`;
                 
                 if(!p) {
-                    card.innerHTML = `
-                        <div class="room-header"><span>${rName}</span><span style="color:#94a3b8; font-size:11px;">VACANT</span></div>
-                        <p style="text-align:center; color:#94a3b8; font-size:12px; margin:15px 0;">Available for Intake Routing</p>
-                    `;
+                    card.innerHTML = `<div class="room-header"><span>${rName}</span><span style="color:#94a3b8; font-size:11px;">VACANT</span></div><p style="text-align:center; color:#94a3b8; font-size:12px; margin:15px 0;">Vacant Bed</p>`;
                 } else {
                     card.innerHTML = `
-                        <div class="room-header">
-                            <span>${rName}</span>
-                            <span class="badge b-${p.urgency}">${urgencyLabels[p.urgency]}</span>
-                        </div>
-                        <div class="patient-clickable" onclick="launchSecureGate('${rName}')">
-                            🔓 VIEW ENCRYPTED CHART<br>
-                            <span style="font-size:11px; font-weight:normal; color:#475569;">ID: ${p.id}</span>
-                        </div>
-                        <div style="font-size:12px; line-height: 1.4;">
+                        <div class="room-header"><span>${rName}</span><span class="badge b-${p.urgency}">${urgencyLabels[p.urgency]}</span></div>
+                        <div class="patient-clickable" onclick="launchSecureGate('${rName}')">🔓 ACCESS PATIENT CHART LOG</div>
+                        <div style="font-size:12px;">
                             <p style="margin:2px 0;"><strong>Patient:</strong> ${p.lastName}, ${p.firstName} (${calculateAge(p.dob)})</p>
                             <p style="margin:2px 0;"><strong>Status:</strong> <span style="color:var(--primary); font-weight:bold;">${p.status}</span></p>
-                        </div>
-                    `;
+                        </div>`;
                 }
                 grid.appendChild(card);
             }
         }
 
-        // ACCESS CONTROL SYSTEM GATEWAYS
+        // CHART PROTECTION INTERFACES
         function launchSecureGate(roomName) {
-            activeSelectedRoomName = roomName;
-            const p = state.rooms[roomName];
-            if(!p) return;
-
-            document.getElementById('modalPatientTitle').textContent = `Secure Chart View: ${roomName}`;
+            activeSelectedRoomName = roomName; const p = state.rooms[roomName]; if(!p) return;
+            document.getElementById('modalPatientTitle').textContent = `Chart Interface: ${roomName}`;
             
-            // Clean interface slate 
-            document.getElementById('gatePasscodeInput').value = "";
             document.getElementById('verifyDocInputDob').value = "";
-            document.getElementById('modalAuthGate').style.display = "block";
-            document.getElementById('modalDocVerificationGate').style.display = "none";
-            document.getElementById('modalSecureBody').style.display = "none";
-
-            document.getElementById('secureModal').classList.add('active');
-        }
-
-        function verifyGatePasscode() {
-            const input = document.getElementById('gatePasscodeInput').value;
-            if(input === state.masterPasscode) {
-                // If the user is operating within the Doctor console space, enforce the mandatory secondary DOB checkpoint
-                if(currentPortal === 'doctor') {
-                    document.getElementById('modalAuthGate').style.display = "none";
-                    document.getElementById('modalDocVerificationGate').style.display = "block";
-                } else {
-                    displaySecureChart();
-                }
+            if(sessionUser.role === 'doctor') {
+                document.getElementById('modalDocVerificationGate').style.display = "block";
+                document.getElementById('modalSecureBody').style.display = "none";
             } else {
-                alert("Security handshake violation: Invalid Passcode.");
+                document.getElementById('modalDocVerificationGate').style.display = "none";
+                displaySecureChart();
             }
+            document.getElementById('secureModal').classList.add('active');
         }
 
         function verifyPatientDobForDoctor() {
             const p = state.rooms[activeSelectedRoomName];
-            const inputDob = document.getElementById('verifyDocInputDob').value;
-            if(p && inputDob === p.dob) {
-                displaySecureChart();
-            } else {
-                alert("Verification Failure: Inputted Date of Birth does not align with core record file.");
-            }
+            if(p && document.getElementById('verifyDocInputDob').value === p.dob) { displaySecureChart(); } 
+            else { alert("Identity verification failure: DOB mismatch."); }
         }
 
-        function bypassVerificationEmergency() {
-            alert("EMERGENCY BYPASS TRIGGERED: Logging override authentication event.");
-            displaySecureChart();
-        }
+        function bypassVerificationEmergency() { alert("EMERGENCY BYPASS AUTHORIZED."); displaySecureChart(); }
 
-        // CORE RECOVERY & IN-MODAL RENDERING PACKET
         function displaySecureChart() {
-            document.getElementById('modalAuthGate').style.display = "none";
             document.getElementById('modalDocVerificationGate').style.display = "none";
             document.getElementById('modalSecureBody').style.display = "block";
+            const p = state.rooms[activeSelectedRoomName]; if(!p) return;
 
-            const p = state.rooms[activeSelectedRoomName];
-            if(!p) return;
-
-            // Populate Metadata block
             document.getElementById('patientMetaProfile').innerHTML = `
-                <strong>Patient ID:</strong> ${p.id} <br>
-                <strong>Full Legal Name:</strong> ${p.lastName}, ${p.firstName} <br>
-                <strong>Date of Birth:</strong> ${p.dob} (${calculateAge(p.dob)}) <br>
-                <strong>Insurance File:</strong> ${p.insurance} <br>
-                <strong>Intake Symptoms logged:</strong> <span style="color:#ef4444;">${p.symptoms}</span>
-            `;
+                <strong>Patient ID:</strong> ${p.id} | <strong>Legal Name:</strong> ${p.lastName}, ${p.firstName} <br>
+                <strong>DOB:</strong> ${p.dob} (${calculateAge(p.dob)}) | <strong>Insurance:</strong> ${p.insurance}<br>
+                <strong>Symptoms:</strong> <span style="color:#ef4444;">${p.symptoms}</span>`;
 
-            // Display current dynamic values inside fields
             document.getElementById('chartDisplayData').innerHTML = `
-                <p><strong>Tracking Status:</strong> ${p.status}</p>
-                <p><strong>Diagnosis (Dx):</strong> ${p.diagnosis || 'None entered'}</p>
-                <p><strong>Therapeutics (Rx):</strong> ${p.rx || 'None prescribed'}</p>
-                <p><strong>Lab Results Summary:</strong> ${p.labsSummary || 'Awaiting lab pipeline execution'}</p>
-                <p><strong>Discharge Officer Context:</strong> ${p.dischargeNotes || 'None'}</p>
-                <p><strong>Assigned Specialty Referral:</strong> ${p.referralSpecialty || 'None'}</p>
-            `;
+                <p><strong>Tracking Status:</strong> ${p.status}</p><p><strong>Diagnosis (Dx):</strong> ${p.diagnosis || 'None'}</p>
+                <p><strong>Therapeutics (Rx):</strong> ${p.rx || 'None'}</p><p><strong>Diagnostics/Labs summary:</strong> ${p.labsSummary || 'Awaiting Action'}</p>
+                <p><strong>Discharge Context:</strong> ${p.dischargeNotes || 'None'}</p><p><strong>Outpatient Specialist Referral:</strong> ${p.referralSpecialty || 'None'}</p>`;
 
-            // Show/Hide contextual portal tools matching identity profile active
-            document.getElementById('modalDoctorActions').style.display = (currentPortal === 'doctor') ? 'block' : 'none';
-            document.getElementById('modalLabActions').style.display = (currentPortal === 'labs') ? 'block' : 'none';
+            // Role view constraints
+            document.getElementById('modalDoctorActions').style.display = (sessionUser.role === 'doctor') ? 'block' : 'none';
+            document.getElementById('modalLabActions').style.display = (sessionUser.role === 'labs') ? 'block' : 'none';
+            document.getElementById('modalCodeBlueWrapper').style.display = (['doctor','admission','manager'].includes(sessionUser.role)) ? 'block' : 'none';
 
-            // Populate clinical input default targets for editing
-            if(currentPortal === 'doctor') {
-                document.getElementById('mdStatusSelect').value = p.status === "Awaiting Labs" ? "Awaiting Labs" : (["Getting checked","In Diagnostics","Stable"].includes(p.status) ? p.status : "Getting checked");
+            if(sessionUser.role === 'doctor') {
+                document.getElementById('mdStatusSelect').value = ["Getting checked","Awaiting Labs","In Diagnostics","Stable"].includes(p.status) ? p.status : "Getting checked";
+                // Enforce Lab restrictions on status choices
+                if(p.status === "Awaiting Labs") { document.getElementById('mdStatusSelect').disabled = true; } else { document.getElementById('mdStatusSelect').disabled = false; }
+                
                 document.getElementById('mdUrgencySelect').value = p.urgency;
                 document.getElementById('mdDxText').value = p.diagnosis;
                 document.getElementById('mdRxText').value = p.rx;
                 document.getElementById('mdDischargeNotesText').value = p.dischargeNotes;
                 document.getElementById('mdReferralSelect').value = p.referralSpecialty;
-
-                // Rule Enforcer: Enable Discharge options ONLY if Rx fields are fully written out
-                if(p.rx.trim() !== "") {
-                    document.getElementById('btnDischargeExecution').style.display = "block";
-                } else {
-                    document.getElementById('btnDischargeExecution').style.display = "none";
-                }
+                
+                // Allow discharge only if a prescription (Rx) is logged
+                document.getElementById('btnDischargeExecution').style.display = (p.rx.trim() !== "") ? "block" : "none";
             }
-
-            if(currentPortal === 'labs') {
+            if(sessionUser.role === 'labs') {
                 document.getElementById('labSummaryText').value = p.labsSummary;
+                // Lab processing rule constraint check
+                if(p.status !== "Awaiting Labs") {
+                    document.getElementById('labSummaryText').disabled = true;
+                } else { document.getElementById('labSummaryText').disabled = false; }
             }
-
-            document.getElementById('modalCodeBlueBtn').textContent = p.codeBlue ? "STAND DOWN CODE BLUE" : "ACTIVATE ROOM CODE BLUE ALERT";
+            document.getElementById('modalCodeBlueBtn').textContent = p.codeBlue ? "STAND DOWN ALERT" : "ACTIVATE ROOM CODE BLUE ALERT";
         }
 
-        // CLINICAL STATE TRANSITIONS (DOCTOR UPDATES)
+        // CLINICAL COMMITS
         function submitDoctorUpdates() {
-            const p = state.rooms[activeSelectedRoomName];
-            if(!p) return;
-
-            p.status = document.getElementById('mdStatusSelect').value;
+            const p = state.rooms[activeSelectedRoomName]; if(!p) return;
+            if(p.status !== "Awaiting Labs") { p.status = document.getElementById('mdStatusSelect').value; }
             p.urgency = parseInt(document.getElementById('mdUrgencySelect').value);
             p.diagnosis = document.getElementById('mdDxText').value.trim();
             p.rx = document.getElementById('mdRxText').value.trim();
             p.dischargeNotes = document.getElementById('mdDischargeNotesText').value.trim();
             p.referralSpecialty = document.getElementById('mdReferralSelect').value;
 
-            syncGlobalArchiveLog(p.id, p);
-            saveState();
-            displaySecureChart();
-            renderRoomsGrid();
-            renderHistoryTable();
-            alert("Clinical updates committed to active registry safely.");
+            syncGlobalArchiveLog(p.id, p); saveState(); displaySecureChart(); renderRoomsGrid(); renderHistoryTable();
+            alert("Doctor entries logged.");
         }
 
-        // LAB WORKFLOW PIECE
         function submitLabResults() {
-            const p = state.rooms[activeSelectedRoomName];
-            if(!p) return;
-
-            const text = document.getElementById('labSummaryText').value.trim();
-            if(!text) {
-                alert("Please add diagnostic finding writeups prior to submission.");
-                return;
-            }
-
-            p.labsSummary = text;
-            p.status = "Labs Complete"; // Auto state routing forced constraint rule
-
-            syncGlobalArchiveLog(p.id, p);
-            saveState();
-            displaySecureChart();
-            renderRoomsGrid();
-            renderHistoryTable();
-            alert("Diagnostics dispatched: Patient tracking updated to 'Labs Complete'.");
+            const p = state.rooms[activeSelectedRoomName]; if(!p) return;
+            if(p.status !== "Awaiting Labs") { alert("Action blocked: Laboratory processing can only be performed when the tracking status is set to 'Awaiting Labs'."); return; }
+            
+            p.labsSummary = document.getElementById('labSummaryText').value.trim();
+            p.status = "Labs Complete";
+            syncGlobalArchiveLog(p.id, p); saveState(); displaySecureChart(); renderRoomsGrid(); renderHistoryTable();
+            alert("Labs processed successfully.");
         }
 
-        // FULL TERMINATION DISCHARGE PIPELINE
         function executeDischarge() {
-            const p = state.rooms[activeSelectedRoomName];
-            if(!p) return;
-
-            // Structural string mutation formatting rule constraint handling
-            let finalDisposition = "Discharged Formally";
-            if(p.referralSpecialty) {
-                finalDisposition += ` (Urged to follow up with ${p.referralSpecialty})`;
-            }
-
-            p.status = finalDisposition;
+            const p = state.rooms[activeSelectedRoomName]; if(!p) return;
+            p.status = p.referralSpecialty ? `Discharged (Urged follow up with ${p.referralSpecialty})` : "Discharged Formally";
             syncGlobalArchiveLog(p.id, p);
-
-            // Clean active hospital room matrix slot entirely 
             state.rooms[activeSelectedRoomName] = null;
-            saveState();
-
-            closeModal();
-            updateRoomDropdown();
-            renderRoomsGrid();
-            renderHistoryTable();
-            alert(`Bed released. Records for patient ${p.id} archived successfully.`);
+            saveState(); closeModal(); updateRoomDropdown(); renderRoomsGrid(); renderHistoryTable();
         }
 
-        // GLOBAL ALERTS (CODE BLUE EMERGENCY MODULATORS)
+        // EMERGENCY MODULATORS
         function toggleRoomCodeBlueFromModal() {
-            const p = state.rooms[activeSelectedRoomName];
-            if(!p) return;
-            p.codeBlue = !p.codeBlue;
-            saveState();
-            displaySecureChart();
-            renderRoomsGrid();
+            const p = state.rooms[activeSelectedRoomName]; if(!p) return;
+            p.codeBlue = !p.codeBlue; saveState(); displaySecureChart(); renderRoomsGrid();
         }
 
         function triggerGlobalCodeBlue() {
-            // Admission or Doctor fallback instant override toggle tool
-            let count = 0;
-            for(let r in state.rooms) {
-                if(state.rooms[r]) {
-                    state.rooms[r].codeBlue = true;
-                    count++;
-                }
-            }
-            if(count === 0) {
-                alert("No patients currently occupy ER beds to register a crisis alert.");
-                return;
-            }
-            saveState();
-            renderRoomsGrid();
-            alert(`CRITICAL ALERT: Code Blue engaged across active resuscitation vectors.`);
+            if(!['doctor','admission','manager'].includes(sessionUser.role)) { alert("Unauthorized role privilege."); return; }
+            let count = 0; for(let r in state.rooms) { if(state.rooms[r]) { state.rooms[r].codeBlue = true; count++; } }
+            if(count > 0) { saveState(); renderRoomsGrid(); alert("Code Blue active across occupied rooms!"); }
         }
 
-        // PERSISTENCE SYNC MANAGEMENT HELPERS
-        function syncGlobalArchiveLog(id, updatedPatientObject) {
-            let idx = state.patientsLog.findIndex(item => item.id === id);
-            if(idx !== -1) {
-                state.patientsLog[idx] = { ...state.patientsLog[idx], ...updatedPatientObject };
-            }
-        }
+        function syncGlobalArchiveLog(id, obj) { let idx = state.patientsLog.findIndex(item => item.id === id); if(idx !== -1) { state.patientsLog[idx] = { ...state.patientsLog[idx], ...obj }; } }
+        function closeModal() { document.getElementById('secureModal').classList.remove('active'); activeSelectedRoomName = null; }
 
         function renderHistoryTable() {
-            const tbody = document.getElementById('historyTableBody');
-            tbody.innerHTML = '';
-
+            const tbody = document.getElementById('historyTableBody'); tbody.innerHTML = '';
             state.patientsLog.forEach(p => {
                 let row = document.createElement('tr');
                 row.innerHTML = `
-                    <td><strong>${p.id}</strong></td>
-                    <td>${p.lastName}, ${p.firstName}</td>
-                    <td>${calculateAge(p.dob)}<br><span style="color:#64748b; font-size:10px;">${p.dob}</span></td>
-                    <td style="max-width:140px; word-wrap:break-word;">${p.symptoms}</td>
-                    <td style="max-width:140px; word-wrap:break-word;">${p.diagnosis || '-'}</td>
-                    <td style="max-width:140px; word-wrap:break-word; color:#b45309;">${p.labsSummary || '-'}</td>
-                    <td style="max-width:140px; word-wrap:break-word; color:#16a34a;">${p.rx || '-'}</td>
-                    <td>
-                        <span style="font-weight:bold;">${p.status}</span>
-                        ${p.referralSpecialty ? `<br><span style="color:var(--primary); font-size:11px;">Ref: ${p.referralSpecialty}</span>` : ''}
-                        ${p.dischargeNotes ? `<br><small style="color:#64748b;">"${p.dischargeNotes}"</small>` : ''}
-                    </td>
-                `;
+                    <td><strong>${p.id}</strong></td><td>${p.lastName}, ${p.firstName}</td><td>${calculateAge(p.dob)}<br><small>${p.dob}</small></td>
+                    <td>${p.symptoms}</td><td>${p.diagnosis || '-'}</td><td style="color:#b45309;">${p.labsSummary || '-'}</td><td style="color:#16a34a;">${p.rx || '-'}</td>
+                    <td><strong>${p.status}</strong>${p.referralSpecialty ? `<br><small style="color:var(--primary);">Ref: ${p.referralSpecialty}</small>` : ''}</td>`;
                 tbody.appendChild(row);
             });
         }
 
-        function closeModal() {
-            document.getElementById('secureModal').classList.remove('active');
-            activeSelectedRoomName = null;
-        }
-
-        // Fire
         init();
     </script>
 </body>

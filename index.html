@@ -1,26 +1,28 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ER Admission & Trauma Dashboard</title>
+    <title>Enterprise ER Medical Command Center</title>
     <style>
         :root {
-            --level1: #dc3545; /* Immediate - Red */
-            --level2: #fd7e14; /* Very Urgent - Orange */
-            --level3: #ffc107; /* Urgent - Yellow */
-            --level4: #28a745; /* Standard - Green */
-            --level5: #6c757d; /* Non-Urgent - Gray */
-            --bg-dark: #1e293b;
+            --level1: #dc3545;
+            --level2: #fd7e14;
+            --level3: #ffc107;
+            --level4: #28a745;
+            --level5: #6c757d;
+            --bg-dark: #0f172a;
             --bg-light: #f8fafc;
+            --primary: #2563eb;
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Segoe UI', system-ui, sans-serif;
             margin: 0;
             padding: 20px;
             background-color: var(--bg-light);
-            color: #334155;
+            color: #1e293b;
         }
 
         header {
@@ -34,11 +36,33 @@
             align-items: center;
         }
 
-        h1 { margin: 0; font-size: 24px; }
+        /* Role Switcher Toolbar */
+        .role-bar {
+            background: #e2e8f0;
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .role-btn {
+            padding: 8px 16px;
+            border: none;
+            background: #cbd5e1;
+            cursor: pointer;
+            font-weight: bold;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+        .role-btn.active {
+            background: var(--primary);
+            color: white;
+        }
 
         .dashboard-layout {
             display: grid;
-            grid-template-columns: 1fr 3fr;
+            grid-template-columns: 1fr 2.5fr;
             gap: 20px;
         }
 
@@ -47,46 +71,41 @@
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
         }
 
-        h2 { margin-top: 0; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; font-size: 18px;}
+        h2 { margin-top: 0; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; font-size: 18px; color: var(--bg-dark); }
+        h3 { font-size: 15px; margin: 10px 0 5px 0; color: #475569;}
 
-        /* Form styling */
-        .form-group {
-            margin-bottom: 12px;
-        }
-        label {
-            display: block;
-            font-weight: 600;
-            margin-bottom: 4px;
-            font-size: 14px;
-        }
-        input, select, textarea {
-            width: 100%;
-            padding: 8px;
-            border: 1px solid #cbd5e1;
-            border-radius: 4px;
-            box-sizing: border-box;
-        }
+        .form-group { margin-bottom: 12px; }
+        label { display: block; font-weight: 600; margin-bottom: 4px; font-size: 13px; }
+        input, select, textarea { width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 4px; box-sizing: border-box; font-size: 13px;}
+        
         button {
-            width: 100%;
-            padding: 10px;
-            background-color: #3b82f6;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            font-weight: bold;
-            cursor: pointer;
-            margin-top: 5px;
+            width: 100%; padding: 10px; background-color: var(--primary); color: white;
+            border: none; border-radius: 4px; font-weight: bold; cursor: pointer; margin-top: 5px;
         }
-        button:hover { background-color: #2563eb; }
-        .btn-secondary { background-color: #64748b; margin-top: 10px;}
+        button:hover { background-color: #1d4ed8; }
+        .btn-danger { background-color: #ef4444; }
+        .btn-danger:hover { background-color: #dc2626; }
+        .btn-secondary { background-color: #64748b; }
         .btn-secondary:hover { background-color: #475569; }
+
+        /* Code Blue Callout */
+        .btn-code-blue {
+            background-color: #1e40af;
+            animation: pulse-blue 2s infinite;
+        }
+        @keyframes pulse-blue {
+            0% { box-shadow: 0 0 0 0 rgba(30, 64, 175, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(30, 64, 175, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(30, 64, 175, 0); }
+        }
 
         /* ER Rooms Grid */
         .rooms-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
             gap: 15px;
         }
 
@@ -96,137 +115,121 @@
             border-radius: 6px;
             padding: 15px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-            transition: all 0.3s;
+            transition: all 0.2s;
             position: relative;
         }
 
-        /* Dynamic Urgency Borders */
-        .urgency-1 { border-left-color: var(--level1); background-color: #fff5f5; }
-        .urgency-2 { border-left-color: var(--level2); background-color: #fff9f5; }
-        .urgency-3 { border-left-color: var(--level3); background-color: #fffdf5; }
-        .urgency-4 { border-left-color: var(--level4); background-color: #f5fff6; }
-        .urgency-5 { border-left-color: var(--level5); background-color: #f8fafc; }
+        .urgency-1 { border-left-color: var(--level1); }
+        .urgency-2 { border-left-color: var(--level2); }
+        .urgency-3 { border-left-color: var(--level3); }
+        .urgency-4 { border-left-color: var(--level4); }
+        .urgency-5 { border-left-color: var(--level5); }
+
+        /* Code Blue Dynamic Animation Styles */
+        .code-blue-active {
+            animation: shake 0.3s infinite, blink-blue-bg 0.5s infinite alternate !important;
+            border-left-color: #0000ff !important;
+        }
+        @keyframes shake {
+            0% { transform: translate(1px, 1px) rotate(0deg); }
+            100% { transform: translate(-1px, -2px) rotate(-1deg); }
+        }
+        @keyframes blink-blue-bg {
+            0% { background-color: #ffffff; box-shadow: inset 0 0 20px rgba(0,0,255,0.2); }
+            100% { background-color: #93c5fd; box-shadow: inset 0 0 30px rgba(0,0,255,0.6); }
+        }
 
         .room-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-weight: bold;
-            border-bottom: 1px solid #e2e8f0;
-            padding-bottom: 5px;
-            margin-bottom: 10px;
+            display: flex; justify-content: space-between; align-items: center;
+            font-weight: bold; border-bottom: 1px solid #e2e8f0; padding-bottom: 5px; margin-bottom: 10px;
         }
 
-        .badge {
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-size: 11px;
-            color: white;
-            font-weight: bold;
-        }
+        .badge { padding: 2px 6px; border-radius: 4px; font-size: 11px; color: white; font-weight: bold; }
         .b-1 { background-color: var(--level1); }
         .b-2 { background-color: var(--level2); }
         .b-3 { background-color: var(--level3); }
         .b-4 { background-color: var(--level4); }
         .b-5 { background-color: var(--level5); }
 
-        .patient-details p {
-            margin: 4px 0;
-            font-size: 13px;
+        .patient-clickable {
+            background: #f1f5f9; padding: 10px; border-radius: 6px; cursor: pointer;
+            border: 1px dashed #cbd5e1; margin-bottom: 10px; text-align: center; font-weight: 600;
         }
+        .patient-clickable:hover { background: #e2e8f0; color: var(--primary); }
 
-        .symptoms-box {
-            background-color: rgba(0, 0, 0, 0.04);
-            border-radius: 4px;
-            padding: 6px 8px;
-            margin: 6px 0;
-            font-size: 12px;
-            border-left: 3px solid #64748b;
+        .clinical-box {
+            background: #fafafa; border: 1px solid #e2e8f0; border-radius: 4px;
+            padding: 8px; margin-bottom: 6px; font-size: 12px;
         }
+        .clinical-box strong { color: #475569; display: block; margin-bottom: 2px;}
 
-        .room-actions {
-            margin-top: 12px;
-            padding-top: 10px;
-            border-top: 1px dashed #e2e8f0;
+        /* Modals */
+        .modal-overlay {
+            position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(15, 23, 42, 0.6);
+            display: flex; justify-content: center; align-items: center; z-index: 1000; visibility: hidden;
         }
+        .modal-overlay.active { visibility: visible; }
+        .modal-content { background: white; padding: 25px; border-radius: 8px; width: 450px; max-height: 85vh; overflow-y: auto; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); }
 
-        .action-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 5px;
-            margin-bottom: 5px;
-        }
-
-        .room-actions select, .room-actions input {
-            font-size: 12px;
-            padding: 4px;
-        }
-
-        .btn-action {
-            padding: 4px 8px;
-            font-size: 12px;
-            background-color: #0284c7;
-            margin: 0;
-        }
-        .btn-discharge { background-color: #e11d48; }
-        .btn-discharge:hover { background-color: #be123c; }
-
-        /* Records Table */
-        .records-section {
-            margin-top: 30px;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            background: white;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
-        }
-        th, td {
-            padding: 12px;
-            text-align: left;
-            border-bottom: 1px solid #e2e8f0;
-            font-size: 13px;
-        }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; background: white;}
+        th, td { padding: 10px; text-align: left; border-bottom: 1px solid #e2e8f0; font-size: 12px; }
         th { background-color: var(--bg-dark); color: white; }
-        tr:hover { background-color: #f1f5f9; }
     </style>
 </head>
 <body>
 
     <header>
-        <h1>Emergency Department Command Center</h1>
-        <div id="clock">ER Active Dashboard</div>
+        <h1>Emergency Command Center</h1>
+        <div id="activeRoleDisplay" style="font-weight: bold; color: #38bdf8;">Current Portal: Admission Officer</div>
     </header>
 
+    <div class="role-bar">
+        <span><strong>Access Gateway:</strong></span>
+        <button class="role-btn active" id="btn-role-admission" onclick="switchPortal('admission')">Admission Portal</button>
+        <button class="role-btn" id="btn-role-doctor" onclick="switchPortal('doctor')">Doctor Portal</button>
+        <button class="role-btn" id="btn-role-labs" onclick="switchPortal('labs')">Laboratory Portal</button>
+        <button class="role-btn" id="btn-role-manager" onclick="switchPortal('manager')" style="background-color: #a855f7; color: white;">Manager Portal</button>
+    </div>
+
     <div class="dashboard-layout">
-        <!-- LEFT CONTROL PANEL -->
-        <div class="controls">
-            <!-- Patient Admission Form -->
-            <div class="panel" style="margin-bottom: 20px;">
-                <h2>Triage & Intake</h2>
+        <div class="left-column">
+            
+            <div id="panel-admission" class="panel portal-workspace">
+                <h2>New Intake Triage</h2>
+                
+                <div style="background: #f0fdf4; border: 1px solid #bbf7d0; padding: 8px; border-radius: 4px; margin-bottom: 15px;">
+                    <label><strong>Retrieve Registered Patient Data:</strong></label>
+                    <input type="text" id="searchQuery" placeholder="Enter Hospital ID or Last Name" style="margin-bottom: 5px;">
+                    <input type="date" id="searchDob" placeholder="Verify DOB if searching by Name" style="margin-bottom: 5px;">
+                    <button type="button" class="btn-secondary" onclick="lookupPatient()" style="padding:4px; font-size:12px;">Query Records</button>
+                </div>
+
                 <form id="admissionForm">
                     <div class="form-group">
-                        <label>Patient Name</label>
-                        <input type="text" id="pName" required placeholder="John Doe">
+                        <label>First Name</label>
+                        <input type="text" id="pFirstName" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Last Name</label>
+                        <input type="text" id="pLastName" required>
                     </div>
                     <div class="form-group">
                         <label>Date of Birth</label>
-                        <input type="date" id="pDob" required>
+                        <input type="date" id="pDob" onchange="calculateFormAge()" required>
+                        <small id="calculatedAgeForm" style="color: var(--primary); font-weight: bold;"></small>
                     </div>
                     <div class="form-group">
-                        <label>Insurance Number (If applicable)</label>
-                        <input type="text" id="pInsurance" placeholder="INS-99231">
+                        <label>Insurance ID (Optional)</label>
+                        <input type="text" id="pInsurance">
                     </div>
                     <div class="form-group">
-                        <label>Chief Complaint / Symptoms</label>
-                        <textarea id="pSymptoms" rows="2" required placeholder="e.g., Acute chest pain, shortness of breath, nausea..."></textarea>
+                        <label>Symptoms / Chief Complaint</label>
+                        <textarea id="pSymptoms" rows="2" required></textarea>
                     </div>
                     <div class="form-group">
-                        <label>Trauma/Urgency Level</label>
+                        <label>Trauma Classification</label>
                         <select id="pUrgency">
-                            <option value="1">Level 1: IMMEDIATE (Life-Threatening)</option>
+                            <option value="1">Level 1: IMMEDIATE - LIFE THREATENING</option>
                             <option value="2">Level 2: Very Urgent</option>
                             <option value="3">Level 3: Urgent</option>
                             <option value="4">Level 4: Standard</option>
@@ -234,246 +237,415 @@
                         </select>
                     </div>
                     <div class="form-group">
-                        <label>Assign to Bed/Room</label>
-                        <select id="pRoom"></select>
+                        <label>Allocation Destination</label>
+                        <select id="pRoom" required></select>
                     </div>
-                    <button type="submit">Admit & Allocate</button>
+                    <button type="submit">Complete Intake & Bed Assign</button>
                 </form>
             </div>
 
-            <!-- Doctor Management -->
-            <div class="panel">
-                <h2>Manage ER Staff</h2>
-                <div class="form-group">
-                    <label>Add On-Duty Doctor</label>
-                    <input type="text" id="newDocName" placeholder="Dr. Smith, MD">
-                    <button class="btn-secondary" onclick="addDoctor()">Add Doctor</button>
-                </div>
-                <div class="form-group">
-                    <label>Current Doctors On Duty</label>
-                    <ul id="doctorsList" style="padding-left: 20px; font-size: 13px; margin: 5px 0;"></ul>
-                </div>
+            <div id="panel-clinical-info" class="panel portal-workspace" style="display:none;">
+                <h2>Clinical Operations Mode</h2>
+                <p style="font-size:13px; color: #64748b;">Please click a patient card inside an active ER room bay to perform dynamic interactions, evaluate records, authorize diagnostic routing paths, log treatments, or dispatch clinical release forms.</p>
             </div>
+
+            <div id="panel-manager" class="panel portal-workspace" style="display:none;">
+                <h2>System Manager Controls</h2>
+                <div class="form-group">
+                    <label>Master Passcode Config</label>
+                    <input type="text" id="mgrPasscodeField" value="1234">
+                    <button onclick="updateMasterPasscode()">Update Passcode</button>
+                </div>
+                <hr>
+                <div class="form-group">
+                    <label>Authorize New Medical Practitioner Name</label>
+                    <input type="text" id="newDocName" placeholder="Dr. Jennifer Evans, MD">
+                    <button class="btn-secondary" onclick="addDoctor()">Authorize Doctor</button>
+                </div>
+                <h3>Active Roster Staff</h3>
+                <ul id="managerDocList" style="font-size:13px; padding-left: 20px;"></ul>
+            </div>
+
         </div>
 
-        <!-- RIGHT ROOMS MONITOR -->
-        <div class="panel">
-            <h2>ER Bays & Rooms Status</h2>
-            <div class="rooms-grid" id="roomsGrid">
-                <!-- JavaScript handles population -->
+        <div class="right-column">
+            <div class="panel">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <h2 style="margin:0; border:none;">Live Emergency Bed Matrix</h2>
+                    <button class="btn-danger btn-code-blue" style="width: auto; padding: 6px 12px; font-size:12px;" onclick="triggerGlobalCodeBlue()">TRIGGER ACTIVE CODE BLUE</button>
+                </div>
+                <div class="rooms-grid" id="roomsGrid"></div>
             </div>
         </div>
     </div>
 
-    <!-- ARCHIVED PATIENT LOGS -->
-    <div class="panel records-section">
-        <h2>Permanent Patient Records (Archived & Active)</h2>
+    <div class="panel">
+        <h2>Permanent Longitudinal Clinical Records Vault</h2>
         <table>
             <thead>
                 <tr>
                     <th>Patient ID</th>
                     <th>Name</th>
-                    <th>DOB</th>
-                    <th>Insurance</th>
-                    <th>Symptoms (Intake)</th>
-                    <th>Initial Trauma</th>
-                    <th>Final Status</th>
-                    <th>Assigned Doctor</th>
-                    <th>Clinical Notes / Orders</th>
+                    <th>Age/DOB</th>
+                    <th>Symptoms</th>
+                    <th>Dx (Diagnosis)</th>
+                    <th>Labs Summary</th>
+                    <th>Rx Medications</th>
+                    <th>Discharge Status & Referrals</th>
                 </tr>
             </thead>
-            <tbody id="recordsTableBody">
-                <!-- Records will remain here even after discharge -->
-            </tbody>
+            <tbody id="historyTableBody"></tbody>
         </table>
     </div>
 
-    <script>
-        // CONFIG & INITIAL STATE
-        const TOTAL_ROOMS = 8; 
-        let doctors = ["Dr. House", "Dr. Grey", "Dr. Watson"];
-        let patientsLog = []; // Permanent database
-        let rooms = {}; // Active grid state
+    <div class="modal-overlay" id="secureModal">
+        <div class="modal-content">
+            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #e2e8f0; padding-bottom:8px;">
+                <h2 id="modalPatientTitle" style="margin:0; border:none;">Protected Health Record</h2>
+                <button onclick="closeModal()" style="width:auto; margin:0; padding:4px 8px; background:#ef4444;">X</button>
+            </div>
+            
+            <div id="modalAuthGate">
+                <p style="font-size:13px; margin: 15px 0 5px 0; color:#ef4444; font-weight:bold;">🔒 Clinical Security Clearance Required</p>
+                <input type="password" id="gatePasscodeInput" placeholder="Enter System Passcode" style="margin-bottom:10px;">
+                <button onclick="verifyGatePasscode()">Authenticate Identity</button>
+            </div>
 
-        // Initialize empty ER Rooms
+            <div id="modalDocVerificationGate" style="display:none;">
+                <p style="font-size:13px; margin:15px 0 5px 0; font-weight:bold; color:var(--primary);">Identity Confirmed. Verify Patient DOB to unlock Chart:</p>
+                <input type="date" id="verifyDocInputDob" style="margin-bottom:10px;">
+                <button onclick="verifyPatientDobForDoctor()">Verify Patient Identity</button>
+                <p style="text-align:center; margin:8px 0; font-size:11px; color:#64748b;">- OR -</p>
+                <button class="btn-danger" onclick="bypassVerificationEmergency()">CRITICAL EMERGENCY BYPASS</button>
+            </div>
+
+            <div id="modalSecureBody" style="display:none; margin-top:15px;">
+                <div id="patientMetaProfile" style="background:#f1f5f9; padding:10px; border-radius:6px; font-size:12px; margin-bottom:15px;"></div>
+                
+                <div id="modalDoctorActions" class="clinical-box" style="border-color: #3b82f6;">
+                    <strong>Attending Physician Panel</strong>
+                    <div class="form-group">
+                        <label>Update Clinical Status Tracker</label>
+                        <select id="mdStatusSelect">
+                            <option value="Getting checked">Getting checked</option>
+                            <option value="Awaiting Labs">Awaiting Labs</option>
+                            <option value="In Diagnostics">In Diagnostics</option>
+                            <option value="Stable">Stable</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Triage Urgency Override</label>
+                        <select id="mdUrgencySelect">
+                            <option value="1">Level 1: Immediate</option>
+                            <option value="2">Level 2: Very Urgent</option>
+                            <option value="3">Level 3: Urgent</option>
+                            <option value="4">Level 4: Standard</option>
+                            <option value="5">Level 5: Non-Urgent</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Diagnosis (Dx) Entry</label>
+                        <textarea id="mdDxText" rows="2"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Prescribe Therapeutics & Medication Plans (Rx)</label>
+                        <textarea id="mdRxText" rows="2"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Clinical Discharge Officer Notes</label>
+                        <textarea id="mdDischargeNotesText" rows="2"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Outpatient Specialist Referral Route</label>
+                        <select id="mdReferralSelect">
+                            <option value="">None / Not Applicable</option>
+                            <option value="Cardiologist">Cardiology Specialist</option>
+                            <option value="Neurologist">Neurology Specialist</option>
+                            <option value="Orthopedic Surgeon">Orthopedic Surgery</option>
+                            <option value="Oncologist">Oncology</option>
+                            <option value="Pediatrician">Pediatrics</option>
+                            <option value="Gastroenterologist">Gastroenterology</option>
+                            <option value="Nephrologist">Nephrology</option>
+                        </select>
+                    </div>
+                    <button onclick="submitDoctorUpdates()">Commit Medical Records</button>
+                    <button class="btn-danger" id="btnDischargeExecution" onclick="executeDischarge()" style="margin-top:8px; display:none;">Authorize Complete Discharge & Clear Bed</button>
+                </div>
+
+                <div id="modalLabActions" class="clinical-box" style="border-color: #eab308;">
+                    <strong>Pathology & Laboratory Diagnostic Workspace</strong>
+                    <div class="form-group">
+                        <label>Lab Findings Summary / Diagnostics Text</label>
+                        <textarea id="labSummaryText" rows="3" placeholder="Input bloodwork counts, metabolic panels, toxicology, or imaging notes..."></textarea>
+                    </div>
+                    <button style="background-color:#eab308; color:black;" onclick="submitLabResults()">Submit Findings & Set Status: "Labs Complete"</button>
+                </div>
+
+                <div class="clinical-box">
+                    <strong>Current Active Clinical Data Chart</strong>
+                    <div id="chartDisplayData"></div>
+                </div>
+
+                <div class="form-group" style="margin-top:10px;">
+                    <button class="btn-danger" id="modalCodeBlueBtn" onclick="toggleRoomCodeBlueFromModal()">ACTIVATE ROOM CODE BLUE ALERT</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // CONFIG & APPLICATION STATE
+        const TOTAL_ROOMS = 10;
+        let currentPortal = 'admission'; 
+        let activeSelectedRoomName = null;
+
+        // DB State objects loaded via localStorage or Defaults
+        let state = {
+            masterPasscode: "1234",
+            doctors: ["Dr. Gregory House, MD", "Dr. Meredith Grey, MD", "Dr. John Watson, MD"],
+            patientsLog: [], 
+            rooms: {}
+        };
+
+        // Initialize empty room allocations
         for(let i = 1; i <= TOTAL_ROOMS; i++) {
-            rooms[`Room ${i}`] = null; 
+            state.rooms[`Room ${i}`] = null;
         }
 
         const urgencyLabels = {
-            1: "Level 1: Immediate",
-            2: "Level 2: Very Urgent",
-            3: "Level 3: Urgent",
-            4: "Level 4: Standard",
-            5: "Level 5: Non-Urgent"
+            1: "Lvl 1: IMMEDIATE", 2: "Lvl 2: Very Urgent", 3: "Lvl 3: Urgent", 4: "Lvl 4: Standard", 5: "Lvl 5: Non-Urgent"
         };
 
-        // UI Initialization
-        function init() {
-            updateRoomSelectOptions();
-            renderRooms();
-            renderDoctorsList();
+        // STATE LIFECYCLE MANAGEMENT
+        function loadState() {
+            const data = localStorage.getItem('ER_COMMAND_STATE_2026');
+            if(data) {
+                try {
+                    const parsed = JSON.parse(data);
+                    if(parsed.masterPasscode) state.masterPasscode = parsed.masterPasscode;
+                    if(parsed.doctors) state.doctors = parsed.doctors;
+                    if(parsed.patientsLog) state.patientsLog = parsed.patientsLog;
+                    if(parsed.rooms) {
+                        // Ensure layout shape safety across sessions
+                        for(let r in state.rooms) {
+                            if(parsed.rooms[r] !== undefined) state.rooms[r] = parsed.rooms[r];
+                        }
+                    }
+                } catch(e) { console.error("State recovery anomaly: ", e); }
+            }
+            saveState();
         }
 
+        function saveState() {
+            localStorage.setItem('ER_COMMAND_STATE_2026', JSON.stringify(state));
+        }
+
+        // APP INITIALIZER
+        function init() {
+            loadState();
+            switchPortal('admission');
+            updateRoomDropdown();
+            renderRoomsGrid();
+            renderHistoryTable();
+            renderManagerDoctors();
+        }
+
+        // PORTAL ROUTER NAVIGATION 
+        function switchPortal(role) {
+            currentPortal = role;
+            document.querySelectorAll('.role-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.portal-workspace').forEach(p => p.style.display = 'none');
+            
+            document.getElementById(`btn-role-${role}`).classList.add('active');
+            document.getElementById('activeRoleDisplay').textContent = `Current Portal: ${role.toUpperCase()} CONSOLE`;
+
+            if(role === 'admission') {
+                document.getElementById('panel-admission').style.display = 'block';
+            } else if(role === 'manager') {
+                document.getElementById('panel-manager').style.display = 'block';
+            } else {
+                document.getElementById('panel-clinical-info').style.display = 'block';
+            }
+            renderRoomsGrid();
+        }
+
+        // CHRONOLOGICAL AGE CALCULATOR ENGINE
+        function calculateAge(dobString) {
+            if(!dobString) return "N/A";
+            const birthDate = new Date(dobString);
+            const today = new Date();
+            let age = today.getFullYear() - birthDate.getFullYear();
+            const m = today.getMonth() - birthDate.getMonth();
+            if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+                age--;
+            }
+            return age >= 0 ? `${age} Y/O` : "Newborn/Infant";
+        }
+
+        function calculateFormAge() {
+            const dob = document.getElementById('pDob').value;
+            document.getElementById('calculatedAgeForm').textContent = dob ? `Calculated Age: ${calculateAge(dob)}` : "";
+        }
+
+        // AUTO-GENERATOR ID SEQUENCE
         function generatePatientID() {
             let randStr = '';
-            for(let i=0; i<5; i++) {
+            for(let i = 0; i < 5; i++) {
                 randStr += Math.floor(Math.random() * 10);
             }
             return `ER-${randStr}`;
         }
 
-        function updateRoomSelectOptions() {
+        // DOM UTILITY COMPONENT POPULATORS
+        function updateRoomDropdown() {
             const select = document.getElementById('pRoom');
-            select.innerHTML = '';
-            for(let r in rooms) {
-                if(!rooms[r]) {
+            select.innerHTML = '<option value="" disabled selected>Choose Available Bed...</option>';
+            for(let r in state.rooms) {
+                if(!state.rooms[r]) {
                     let opt = document.createElement('option');
-                    opt.value = r;
-                    opt.textContent = `${r} (Vacant)`;
+                    opt.value = r; opt.textContent = `${r} (Vacant)`;
                     select.appendChild(opt);
                 }
             }
-            if(select.innerHTML === '') {
-                select.innerHTML = '<option value="">NO ROOMS AVAILABLE</option>';
-            }
         }
 
-        function renderDoctorsList() {
-            const list = document.getElementById('doctorsList');
-            list.innerHTML = '';
-            doctors.forEach(doc => {
-                let li = document.createElement('line');
-                li.innerHTML = `<li>${doc}</li>`;
-                list.appendChild(li);
+        function renderManagerDoctors() {
+            const ul = document.getElementById('managerDocList');
+            ul.innerHTML = '';
+            state.doctors.forEach(doc => {
+                let li = document.createElement('li');
+                li.textContent = doc;
+                ul.appendChild(li);
             });
         }
 
         function addDoctor() {
             const input = document.getElementById('newDocName');
-            if(input.value.trim() !== "") {
-                doctors.push(input.value.trim());
+            if(input.value.trim()) {
+                state.doctors.push(input.value.trim());
                 input.value = "";
-                renderDoctorsList();
-                renderRooms(); // Update drop-downs in room view
+                saveState();
+                renderManagerDoctors();
+                alert("New Medical Practitioner authorized successfully.");
             }
         }
 
-        // ADMISSION ACTION
+        function updateMasterPasscode() {
+            const code = document.getElementById('mgrPasscodeField').value.trim();
+            if(code) {
+                state.masterPasscode = code;
+                saveState();
+                alert(`Master Passcode successfully updated to: ${code}`);
+            }
+        }
+
+        // PRE-EXISTING RECORDS RETRIEVAL SYSTEM
+        function lookupPatient() {
+            const query = document.getElementById('searchQuery').value.trim().toLowerCase();
+            const dobVerify = document.getElementById('searchDob').value;
+
+            if(!query) {
+                alert("Please supply either a distinct Patient ID or Last Name to query database archives.");
+                return;
+            }
+
+            let foundMatch = null;
+            const isIDSearch = query.startsWith('er-');
+
+            for(let i = state.patientsLog.length - 1; i >= 0; i--) {
+                let p = state.patientsLog[i];
+                if(isIDSearch) {
+                    if(p.id.toLowerCase() === query) { foundMatch = p; break; }
+                } else {
+                    if(p.lastName.toLowerCase() === query) {
+                        if(!dobVerify) {
+                            alert("Identity safety standard protocol mismatch: Verification of Date of Birth is strictly required when querying matching last names.");
+                            return;
+                        }
+                        if(p.dob === dobVerify) { foundMatch = p; break; }
+                    }
+                }
+            }
+
+            if(foundMatch) {
+                document.getElementById('pFirstName').value = foundMatch.firstName;
+                document.getElementById('pLastName').value = foundMatch.lastName;
+                document.getElementById('pDob').value = foundMatch.dob;
+                document.getElementById('pInsurance').value = foundMatch.insurance;
+                document.getElementById('pSymptoms').value = foundMatch.symptoms;
+                calculateFormAge();
+                alert(`Success: Retrived record file [${foundMatch.id}] into current workspace.`);
+            } else {
+                alert("No archival records match the provided verification properties.");
+            }
+        }
+
+        // INTAKE SUBMISSION LOGIC
         document.getElementById('admissionForm').addEventListener('submit', function(e) {
             e.preventDefault();
-            const targetRoom = document.getElementById('pRoom').value;
-            if(!targetRoom) {
-                alert("Please select a vacant room!");
+            const roomTarget = document.getElementById('pRoom').value;
+            if(!roomTarget || state.rooms[roomTarget]) {
+                alert("Target bed allocation conflict. Select an alternate open room.");
                 return;
             }
 
             const newPatient = {
                 id: generatePatientID(),
-                name: document.getElementById('pName').value,
+                firstName: document.getElementById('pFirstName').value.trim(),
+                lastName: document.getElementById('pLastName').value.trim(),
                 dob: document.getElementById('pDob').value,
-                insurance: document.getElementById('pInsurance').value || "N/A",
-                symptoms: document.getElementById('pSymptoms').value,
+                insurance: document.getElementById('pInsurance').value.trim() || "N/A",
+                symptoms: document.getElementById('pSymptoms').value.trim(),
                 urgency: parseInt(document.getElementById('pUrgency').value),
                 status: "Admitted",
-                doctor: "Unassigned",
-                notes: "",
-                orders: ""
+                diagnosis: "",
+                labsSummary: "",
+                rx: "",
+                dischargeNotes: "",
+                referralSpecialty: "",
+                codeBlue: false
             };
 
-            rooms[targetRoom] = newPatient;
-            patientsLog.push(newPatient); // Keep history
+            state.rooms[roomTarget] = newPatient;
+            state.patientsLog.push(newPatient);
+            saveState();
 
-            // Reset form
             document.getElementById('admissionForm').reset();
+            document.getElementById('calculatedAgeForm').textContent = "";
             
-            updateRoomSelectOptions();
-            renderRooms();
-            renderRecordsTable();
+            updateRoomDropdown();
+            renderRoomsGrid();
+            renderHistoryTable();
         });
 
-        // RENDER LIVE ROOMS MATRIX
-        function renderRooms() {
+        // RENDER LIVE ROOM TRACKING CELLS
+        function renderRoomsGrid() {
             const grid = document.getElementById('roomsGrid');
             grid.innerHTML = '';
 
-            for(let roomName in rooms) {
-                const patient = rooms[roomName];
+            for(let rName in state.rooms) {
+                const p = state.rooms[rName];
                 const card = document.createElement('div');
-                card.className = `room-card ${patient ? 'urgency-' + patient.urgency : ''}`;
-
-                if(!patient) {
+                card.className = `room-card ${p ? 'urgency-' + p.urgency : ''} ${p && p.codeBlue ? 'code-blue-active' : ''}`;
+                
+                if(!p) {
                     card.innerHTML = `
-                        <div class="room-header">
-                            <span>${roomName}</span>
-                            <span style="color: #94a3b8; font-size: 12px;">VACANT</span>
-                        </div>
-                        <p style="color: #94a3b8; font-size: 13px; text-align: center; margin: 20px 0;">Ready for Intake</p>
+                        <div class="room-header"><span>${rName}</span><span style="color:#94a3b8; font-size:11px;">VACANT</span></div>
+                        <p style="text-align:center; color:#94a3b8; font-size:12px; margin:15px 0;">Available for Intake Routing</p>
                     `;
                 } else {
-                    // Create doctor options
-                    let docOptions = `<option value="Unassigned">Call Doctor...</option>`;
-                    doctors.forEach(d => {
-                        let selected = patient.doctor === d ? 'selected' : '';
-                        docOptions += `<option value="${d}" ${selected}>${d}</option>`;
-                    });
-
-                    // Create status options
-                    const statuses = ["Admitted", "Getting checked", "In Diagnostics", "Awaiting Labs", "Stable"];
-                    let statusOptions = '';
-                    statuses.forEach(s => {
-                        let selected = patient.status === s ? 'selected' : '';
-                        statusOptions += `<option value="${s}" ${selected}>${s}</option>`;
-                    });
-
-                    // Create urgency shift drop down
-                    let urgencyOptions = '';
-                    for(let level in urgencyLabels) {
-                        let selected = patient.urgency == level ? 'selected' : '';
-                        urgencyOptions += `<option value="${level}" ${selected}>Lvl ${level}</option>`;
-                    }
-
                     card.innerHTML = `
                         <div class="room-header">
-                            <span>${roomName}</span>
-                            <span class="badge b-${patient.urgency}">${urgencyLabels[patient.urgency]}</span>
+                            <span>${rName}</span>
+                            <span class="badge b-${p.urgency}">${urgencyLabels[p.urgency]}</span>
                         </div>
-                        <div class="patient-details">
-                            <p><strong>ID:</strong> ${patient.id}</p>
-                            <p><strong>Name:</strong> ${patient.name}</p>
-                            <p><strong>DOB:</strong> ${patient.dob} | <strong>Ins:</strong> ${patient.insurance}</p>
-                            
-                            <div class="symptoms-box">
-                                <strong>Intake Symptoms:</strong> ${patient.symptoms}
-                            </div>
-
-                            <p><strong>Status:</strong> <span style="color: #2563eb; font-weight:bold;">${patient.status}</span></p>
-                            <p><strong>Staff MD:</strong> <span style="color: #0d9488;">${patient.doctor}</span></p>
-                            
-                            <div style="margin-top:8px;">
-                                <label style="font-size:11px;">MD Clinical Notes & Rx/Labs:</label>
-                                <textarea id="note-${roomName}" rows="2" style="font-size:11px;" placeholder="Type medical chart notes, orders, or prescriptions...">${patient.notes}</textarea>
-                                <button class="btn-action" style="width:auto; padding:2px 6px; font-size:11px; float:right; margin-top:2px;" onclick="saveNotes('${roomName}')">Save Notes</button>
-                                <div style="clear:both;"></div>
-                            </div>
+                        <div class="patient-clickable" onclick="launchSecureGate('${rName}')">
+                            🔓 VIEW ENCRYPTED CHART<br>
+                            <span style="font-size:11px; font-weight:normal; color:#475569;">ID: ${p.id}</span>
                         </div>
-
-                        <div class="room-actions">
-                            <div class="action-row">
-                                <select onchange="assignDoctor('${roomName}', this.value)">
-                                    ${docOptions}
-                                </select>
-                                <select onchange="updateStatus('${roomName}', this.value)">
-                                    ${statusOptions}
-                                </select>
-                            </div>
-                            <div class="action-row">
-                                <select onchange="changeUrgency('${roomName}', this.value)">
-                                    <option disabled selected>MD Change Urgency</option>
-                                    ${urgencyOptions}
-                                </select>
-                                <button class="btn-action btn-discharge" onclick="triggerDischarge('${roomName}')">Discharge / Refer</button>
-                            </div>
+                        <div style="font-size:12px; line-height: 1.4;">
+                            <p style="margin:2px 0;"><strong>Patient:</strong> ${p.lastName}, ${p.firstName} (${calculateAge(p.dob)})</p>
+                            <p style="margin:2px 0;"><strong>Status:</strong> <span style="color:var(--primary); font-weight:bold;">${p.status}</span></p>
                         </div>
                     `;
                 }
@@ -481,99 +653,243 @@
             }
         }
 
-        // OPERATIONS ON ROOMS
-        function assignDoctor(roomName, doctorName) {
-            if(rooms[roomName]) {
-                rooms[roomName].doctor = doctorName;
-                syncWithLog(rooms[roomName].id, { doctor: doctorName });
-                renderRooms();
-                renderRecordsTable();
-            }
-        }
+        // ACCESS CONTROL SYSTEM GATEWAYS
+        function launchSecureGate(roomName) {
+            activeSelectedRoomName = roomName;
+            const p = state.rooms[roomName];
+            if(!p) return;
 
-        function updateStatus(roomName, status) {
-            if(rooms[roomName]) {
-                rooms[roomName].status = status;
-                syncWithLog(rooms[roomName].id, { status: status });
-                renderRooms();
-                renderRecordsTable();
-            }
-        }
-
-        function changeUrgency(roomName, newLevel) {
-            if(rooms[roomName]) {
-                rooms[roomName].urgency = parseInt(newLevel);
-                syncWithLog(rooms[roomName].id, { urgency: parseInt(newLevel) });
-                renderRooms();
-                renderRecordsTable();
-            }
-        }
-
-        function saveNotes(roomName) {
-            const noteText = document.getElementById(`note-${roomName}`).value;
-            if(rooms[roomName]) {
-                rooms[roomName].notes = noteText;
-                syncWithLog(rooms[roomName].id, { notes: noteText });
-                alert("Patient medical chart updated successfully.");
-                renderRecordsTable();
-            }
-        }
-
-        // DISCHARGE WITH SPECIALIST REFERRAL
-        function triggerDischarge(roomName) {
-            const patient = rooms[roomName];
-            if(!patient) return;
-
-            const referral = prompt(`Discharging ${patient.name}.\nIf they require a clinical referral, enter specialist department (e.g., Cardiologist, Neurologist) or leave blank:`);
+            document.getElementById('modalPatientTitle').textContent = `Secure Chart View: ${roomName}`;
             
-            let finalStatus = "Discharged";
-            if(referral && referral.trim() !== "") {
-                finalStatus += ` (Urged to follow up with ${referral.trim()})`;
-            }
+            // Clean interface slate 
+            document.getElementById('gatePasscodeInput').value = "";
+            document.getElementById('verifyDocInputDob').value = "";
+            document.getElementById('modalAuthGate').style.display = "block";
+            document.getElementById('modalDocVerificationGate').style.display = "none";
+            document.getElementById('modalSecureBody').style.display = "none";
 
-            syncWithLog(patient.id, { 
-                status: finalStatus, 
-                notes: patient.notes + (referral ? ` [Referral Specialist ordered: ${referral}]` : "") 
-            });
-
-            // Clear the room out completely
-            rooms[roomName] = null;
-
-            updateRoomSelectOptions();
-            renderRooms();
-            renderRecordsTable();
+            document.getElementById('secureModal').classList.add('active');
         }
 
-        // HELPER DB SYSTEM
-        function syncWithLog(id, updatedObj) {
-            let index = patientsLog.findIndex(p => p.id === id);
-            if(index !== -1) {
-                patientsLog[index] = { ...patientsLog[index], ...updatedObj };
+        function verifyGatePasscode() {
+            const input = document.getElementById('gatePasscodeInput').value;
+            if(input === state.masterPasscode) {
+                // If the user is operating within the Doctor console space, enforce the mandatory secondary DOB checkpoint
+                if(currentPortal === 'doctor') {
+                    document.getElementById('modalAuthGate').style.display = "none";
+                    document.getElementById('modalDocVerificationGate').style.display = "block";
+                } else {
+                    displaySecureChart();
+                }
+            } else {
+                alert("Security handshake violation: Invalid Passcode.");
             }
         }
 
-        function renderRecordsTable() {
-            const tbody = document.getElementById('recordsTableBody');
+        function verifyPatientDobForDoctor() {
+            const p = state.rooms[activeSelectedRoomName];
+            const inputDob = document.getElementById('verifyDocInputDob').value;
+            if(p && inputDob === p.dob) {
+                displaySecureChart();
+            } else {
+                alert("Verification Failure: Inputted Date of Birth does not align with core record file.");
+            }
+        }
+
+        function bypassVerificationEmergency() {
+            alert("EMERGENCY BYPASS TRIGGERED: Logging override authentication event.");
+            displaySecureChart();
+        }
+
+        // CORE RECOVERY & IN-MODAL RENDERING PACKET
+        function displaySecureChart() {
+            document.getElementById('modalAuthGate').style.display = "none";
+            document.getElementById('modalDocVerificationGate').style.display = "none";
+            document.getElementById('modalSecureBody').style.display = "block";
+
+            const p = state.rooms[activeSelectedRoomName];
+            if(!p) return;
+
+            // Populate Metadata block
+            document.getElementById('patientMetaProfile').innerHTML = `
+                <strong>Patient ID:</strong> ${p.id} <br>
+                <strong>Full Legal Name:</strong> ${p.lastName}, ${p.firstName} <br>
+                <strong>Date of Birth:</strong> ${p.dob} (${calculateAge(p.dob)}) <br>
+                <strong>Insurance File:</strong> ${p.insurance} <br>
+                <strong>Intake Symptoms logged:</strong> <span style="color:#ef4444;">${p.symptoms}</span>
+            `;
+
+            // Display current dynamic values inside fields
+            document.getElementById('chartDisplayData').innerHTML = `
+                <p><strong>Tracking Status:</strong> ${p.status}</p>
+                <p><strong>Diagnosis (Dx):</strong> ${p.diagnosis || 'None entered'}</p>
+                <p><strong>Therapeutics (Rx):</strong> ${p.rx || 'None prescribed'}</p>
+                <p><strong>Lab Results Summary:</strong> ${p.labsSummary || 'Awaiting lab pipeline execution'}</p>
+                <p><strong>Discharge Officer Context:</strong> ${p.dischargeNotes || 'None'}</p>
+                <p><strong>Assigned Specialty Referral:</strong> ${p.referralSpecialty || 'None'}</p>
+            `;
+
+            // Show/Hide contextual portal tools matching identity profile active
+            document.getElementById('modalDoctorActions').style.display = (currentPortal === 'doctor') ? 'block' : 'none';
+            document.getElementById('modalLabActions').style.display = (currentPortal === 'labs') ? 'block' : 'none';
+
+            // Populate clinical input default targets for editing
+            if(currentPortal === 'doctor') {
+                document.getElementById('mdStatusSelect').value = p.status === "Awaiting Labs" ? "Awaiting Labs" : (["Getting checked","In Diagnostics","Stable"].includes(p.status) ? p.status : "Getting checked");
+                document.getElementById('mdUrgencySelect').value = p.urgency;
+                document.getElementById('mdDxText').value = p.diagnosis;
+                document.getElementById('mdRxText').value = p.rx;
+                document.getElementById('mdDischargeNotesText').value = p.dischargeNotes;
+                document.getElementById('mdReferralSelect').value = p.referralSpecialty;
+
+                // Rule Enforcer: Enable Discharge options ONLY if Rx fields are fully written out
+                if(p.rx.trim() !== "") {
+                    document.getElementById('btnDischargeExecution').style.display = "block";
+                } else {
+                    document.getElementById('btnDischargeExecution').style.display = "none";
+                }
+            }
+
+            if(currentPortal === 'labs') {
+                document.getElementById('labSummaryText').value = p.labsSummary;
+            }
+
+            document.getElementById('modalCodeBlueBtn').textContent = p.codeBlue ? "STAND DOWN CODE BLUE" : "ACTIVATE ROOM CODE BLUE ALERT";
+        }
+
+        // CLINICAL STATE TRANSITIONS (DOCTOR UPDATES)
+        function submitDoctorUpdates() {
+            const p = state.rooms[activeSelectedRoomName];
+            if(!p) return;
+
+            p.status = document.getElementById('mdStatusSelect').value;
+            p.urgency = parseInt(document.getElementById('mdUrgencySelect').value);
+            p.diagnosis = document.getElementById('mdDxText').value.trim();
+            p.rx = document.getElementById('mdRxText').value.trim();
+            p.dischargeNotes = document.getElementById('mdDischargeNotesText').value.trim();
+            p.referralSpecialty = document.getElementById('mdReferralSelect').value;
+
+            syncGlobalArchiveLog(p.id, p);
+            saveState();
+            displaySecureChart();
+            renderRoomsGrid();
+            renderHistoryTable();
+            alert("Clinical updates committed to active registry safely.");
+        }
+
+        // LAB WORKFLOW PIECE
+        function submitLabResults() {
+            const p = state.rooms[activeSelectedRoomName];
+            if(!p) return;
+
+            const text = document.getElementById('labSummaryText').value.trim();
+            if(!text) {
+                alert("Please add diagnostic finding writeups prior to submission.");
+                return;
+            }
+
+            p.labsSummary = text;
+            p.status = "Labs Complete"; // Auto state routing forced constraint rule
+
+            syncGlobalArchiveLog(p.id, p);
+            saveState();
+            displaySecureChart();
+            renderRoomsGrid();
+            renderHistoryTable();
+            alert("Diagnostics dispatched: Patient tracking updated to 'Labs Complete'.");
+        }
+
+        // FULL TERMINATION DISCHARGE PIPELINE
+        function executeDischarge() {
+            const p = state.rooms[activeSelectedRoomName];
+            if(!p) return;
+
+            // Structural string mutation formatting rule constraint handling
+            let finalDisposition = "Discharged Formally";
+            if(p.referralSpecialty) {
+                finalDisposition += ` (Urged to follow up with ${p.referralSpecialty})`;
+            }
+
+            p.status = finalDisposition;
+            syncGlobalArchiveLog(p.id, p);
+
+            // Clean active hospital room matrix slot entirely 
+            state.rooms[activeSelectedRoomName] = null;
+            saveState();
+
+            closeModal();
+            updateRoomDropdown();
+            renderRoomsGrid();
+            renderHistoryTable();
+            alert(`Bed released. Records for patient ${p.id} archived successfully.`);
+        }
+
+        // GLOBAL ALERTS (CODE BLUE EMERGENCY MODULATORS)
+        function toggleRoomCodeBlueFromModal() {
+            const p = state.rooms[activeSelectedRoomName];
+            if(!p) return;
+            p.codeBlue = !p.codeBlue;
+            saveState();
+            displaySecureChart();
+            renderRoomsGrid();
+        }
+
+        function triggerGlobalCodeBlue() {
+            // Admission or Doctor fallback instant override toggle tool
+            let count = 0;
+            for(let r in state.rooms) {
+                if(state.rooms[r]) {
+                    state.rooms[r].codeBlue = true;
+                    count++;
+                }
+            }
+            if(count === 0) {
+                alert("No patients currently occupy ER beds to register a crisis alert.");
+                return;
+            }
+            saveState();
+            renderRoomsGrid();
+            alert(`CRITICAL ALERT: Code Blue engaged across active resuscitation vectors.`);
+        }
+
+        // PERSISTENCE SYNC MANAGEMENT HELPERS
+        function syncGlobalArchiveLog(id, updatedPatientObject) {
+            let idx = state.patientsLog.findIndex(item => item.id === id);
+            if(idx !== -1) {
+                state.patientsLog[idx] = { ...state.patientsLog[idx], ...updatedPatientObject };
+            }
+        }
+
+        function renderHistoryTable() {
+            const tbody = document.getElementById('historyTableBody');
             tbody.innerHTML = '';
 
-            patientsLog.forEach(p => {
+            state.patientsLog.forEach(p => {
                 let row = document.createElement('tr');
                 row.innerHTML = `
                     <td><strong>${p.id}</strong></td>
-                    <td>${p.name}</td>
-                    <td>${p.dob}</td>
-                    <td>${p.insurance}</td>
-                    <td style="max-width:180px; font-size:11px; word-wrap:break-word;">${p.symptoms}</td>
-                    <td><span class="badge b-${p.urgency}">Level ${p.urgency}</span></td>
-                    <td>${p.status}</td>
-                    <td>${p.doctor}</td>
-                    <td style="max-width:220px; font-size:11px; color:#475569; word-wrap:break-word;">${p.notes || 'No charts/prescriptions added yet.'}</td>
+                    <td>${p.lastName}, ${p.firstName}</td>
+                    <td>${calculateAge(p.dob)}<br><span style="color:#64748b; font-size:10px;">${p.dob}</span></td>
+                    <td style="max-width:140px; word-wrap:break-word;">${p.symptoms}</td>
+                    <td style="max-width:140px; word-wrap:break-word;">${p.diagnosis || '-'}</td>
+                    <td style="max-width:140px; word-wrap:break-word; color:#b45309;">${p.labsSummary || '-'}</td>
+                    <td style="max-width:140px; word-wrap:break-word; color:#16a34a;">${p.rx || '-'}</td>
+                    <td>
+                        <span style="font-weight:bold;">${p.status}</span>
+                        ${p.referralSpecialty ? `<br><span style="color:var(--primary); font-size:11px;">Ref: ${p.referralSpecialty}</span>` : ''}
+                        ${p.dischargeNotes ? `<br><small style="color:#64748b;">"${p.dischargeNotes}"</small>` : ''}
+                    </td>
                 `;
                 tbody.appendChild(row);
             });
         }
 
-        // Run
+        function closeModal() {
+            document.getElementById('secureModal').classList.remove('active');
+            activeSelectedRoomName = null;
+        }
+
+        // Fire
         init();
     </script>
 </body>

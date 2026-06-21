@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ER Admission & Trauma Dashboard</title>
+    <style>
+        :root {
+            --level1: #dc3545; /* Immediate - Red */
+            --level2: #fd7e14; /* Very Urgent - Orange */
+            --level3: #ffc107; /* Urgent - Yellow */
+            --level4: #28a745; /* Standard - Green */
+            --level5: #6c757d; /* Non-Urgent - Gray */
+            --bg-dark: #1e293b;
+            --bg-light: #f8fafc;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: var(--bg-light);
+            color: #334155;
+        }
+
+        header {
+            background-color: var(--bg-dark);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        h1 { margin: 0; font-size: 24px; }
+
+        .dashboard-layout {
+            display: grid;
+            grid-template-columns: 1fr 3fr;
+            gap: 20px;
+        }
+
+        .panel {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+        }
+
+        h2 { margin-top: 0; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; font-size: 18px;}
+
+        /* Form styling */
+        .form-group {
+            margin-bottom: 12px;
+        }
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 4px;
+            font-size: 14px;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #cbd5e1;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 5px;
+        }
+        button:hover { background-color: #2563eb; }
+        .btn-secondary { background-color: #64748b; margin-top: 10px;}
+        .btn-secondary:hover { background-color: #475569; }
+
+        /* ER Rooms Grid */
+        .rooms-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 15px;
+        }
+
+        .room-card {
+            background: #ffffff;
+            border-left: 8px solid #cbd5e1;
+            border-radius: 6px;
+            padding: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        /* Dynamic Urgency Borders */
+        .urgency-1 { border-left-color: var(--level1); background-color: #fff5f5; }
+        .urgency-2 { border-left-color: var(--level2); background-color: #fff9f5; }
+        .urgency-3 { border-left-color: var(--level3); background-color: #fffdf5; }
+        .urgency-4 { border-left-color: var(--level4); background-color: #f5fff6; }
+        .urgency-5 { border-left-color: var(--level5); background-color: #f8fafc; }
+
+        .room-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: bold;
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 5px;
+            margin-bottom: 10px;
+        }
+
+        .badge {
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 11px;
+            color: white;
+            font-weight: bold;
+        }
+        .b-1 { background-color: var(--level1); }
+        .b-2 { background-color: var(--level2); }
+        .b-3 { background-color: var(--level3); }
+        .b-4 { background-color: var(--level4); }
+        .b-5 { background-color: var(--level5); }
+
+        .patient-details p {
+            margin: 4px 0;
+            font-size: 13px;
+        }
+
+        .symptoms-box {
+            background-color: rgba(0, 0, 0, 0.04);
+            border-radius: 4px;
+            padding: 6px 8px;
+            margin: 6px 0;
+            font-size: 12px;
+            border-left: 3px solid #64748b;
+        }
+
+        .room-actions {
+            margin-top: 12px;
+            padding-top: 10px;
+            border-top: 1px dashed #e2e8f0;
+        }
+
+        .action-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 5px;
+            margin-bottom: 5px;
+        }
+
+        .room-actions select, .room-actions input {
+            font-size: 12px;
+            padding: 4px;
+        }
+
+        .btn-action {
+            padding: 4px 8px;
+            font-size: 12px;
+            background-color: #0284c7;
+            margin: 0;
+        }
+        .btn-discharge { background-color: #e11d48; }
+        .btn-discharge:hover { background-color: #be123c; }
+
+        /* Records Table */
+        .records-section {
+            margin-top: 30px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+            font-size: 13px;
+        }
+        th { background-color: var(--bg-dark); color: white; }
+        tr:hover { background-color: #f1f5f9; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Emergency Department Command Center</h1>
+        <div id="clock">ER Active Dashboard</div>
+    </header>
+
+    <div class="dashboard-layout">
+        <!-- LEFT CONTROL PANEL -->
+        <div class="controls">
+            <!-- Patient Admission Form -->
+            <div class="panel" style="margin-bottom: 20px;">
+                <h2>Triage & Intake</h2>
+                <form id="admissionForm">
+                    <div class="form-group">
+                        <label>Patient Name</label>
+                        <input type="text" id="pName" required placeholder="John Doe">
+                    </div>
+                    <div class="form-group">
+                        <label>Date of Birth</label>
+                        <input type="date" id="pDob" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Insurance Number (If applicable)</label>
+                        <input type="text" id="pInsurance" placeholder="INS-99231">
+                    </div>
+                    <div class="form-group">
+                        <label>Chief Complaint / Symptoms</label>
+                        <textarea id="pSymptoms" rows="2" required placeholder="e.g., Acute chest pain, shortness of breath, nausea..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Trauma/Urgency Level</label>
+                        <select id="pUrgency">
+                            <option value="1">Level 1: IMMEDIATE (Life-Threatening)</option>
+                            <option value="2">Level 2: Very Urgent</option>
+                            <option value="3">Level 3: Urgent</option>
+                            <option value="4">Level 4: Standard</option>
+                            <option value="5">Level 5: Non-Urgent</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Assign to Bed/Room</label>
+                        <select id="pRoom"></select>
+                    </div>
+                    <button type="submit">Admit & Allocate</button>
+                </form>
+            </div>
+
+            <!-- Doctor Management -->
+            <div class="panel">
+                <h2>Manage ER Staff</h2>
+                <div class="form-group">
+                    <label>Add On-Duty Doctor</label>
+                    <input type="text" id="newDocName" placeholder="Dr. Smith, MD">
+                    <button class="btn-secondary" onclick="addDoctor()">Add Doctor</button>
+                </div>
+                <div class="form-group">
+                    <label>Current Doctors On Duty</label>
+                    <ul id="doctorsList" style="padding-left: 20px; font-size: 13px; margin: 5px 0;"></ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT ROOMS MONITOR -->
+        <div class="panel">
+            <h2>ER Bays & Rooms Status</h2>
+            <div class="rooms-grid" id="roomsGrid">
+                <!-- JavaScript handles population -->
+            </div>
+        </div>
+    </div>
+
+    <!-- ARCHIVED PATIENT LOGS -->
+    <div class="panel records-section">
+        <h2>Permanent Patient Records (Archived & Active)</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Patient ID</th>
+                    <th>Name</th>
+                    <th>DOB</th>
+                    <th>Insurance</th>
+                    <th>Symptoms (Intake)</th>
+                    <th>Initial Trauma</th>
+                    <th>Final Status</th>
+                    <th>Assigned Doctor</th>
+                    <th>Clinical Notes / Orders</th>
+                </tr>
+            </thead>
+            <tbody id="recordsTableBody">
+                <!-- Records will remain here even after discharge -->
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        // CONFIG & INITIAL STATE
+        const TOTAL_ROOMS = 8; 
+        let doctors = ["Dr. House", "Dr. Grey", "Dr. Watson"];
+        let patientsLog = []; // Permanent database
+        let rooms = {}; // Active grid state
+
+        // Initialize empty ER Rooms
+        for(let i = 1; i <= TOTAL_ROOMS; i++) {
+            rooms[`Room ${i}`] = null; 
+        }
+
+        const urgencyLabels = {
+            1: "Level 1: Immediate",
+            2: "Level 2: Very Urgent",
+            3: "Level 3: Urgent",
+            4: "Level 4: Standard",
+            5: "Level 5: Non-Urgent"
+        };
+
+        // UI Initialization
+        function init() {
+            updateRoomSelectOptions();
+            renderRooms();
+            renderDoctorsList();
+        }
+
+        function generatePatientID() {
+            let randStr = '';
+            for(let i=0; i<5; i++) {
+                randStr += Math.floor(Math.random() * 10);
+            }
+            return `ER-${randStr}`;
+        }
+
+        function updateRoomSelectOptions() {
+            const select = document.getElementById('pRoom');
+            select.innerHTML = '';
+            for(let r in rooms) {
+                if(!rooms[r]) {
+                    let opt = document.createElement('option');
+                    opt.value = r;
+                    opt.textContent = `${r} (Vacant)`;
+                    select.appendChild(opt);
+                }
+            }
+            if(select.innerHTML === '') {
+                select.innerHTML = '<option value="">NO ROOMS AVAILABLE</option>';
+            }
+        }
+
+        function renderDoctorsList() {
+            const list = document.getElementById('doctorsList');
+            list.innerHTML = '';
+            doctors.forEach(doc => {
+                let li = document.createElement('line');
+                li.innerHTML = `<li>${doc}</li>`;
+                list.appendChild(li);
+            });
+        }
+
+        function addDoctor() {
+            const input = document.getElementById('newDocName');
+            if(input.value.trim() !== "") {
+                doctors.push(input.value.trim());
+                input.value = "";
+                renderDoctorsList();
+                renderRooms(); // Update drop-downs in room view
+            }
+        }
+
+        // ADMISSION ACTION
+        document.getElementById('admissionForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const targetRoom = document.getElementById('pRoom').value;
+            if(!targetRoom) {
+                alert("Please select a vacant room!");
+                return;
+            }
+
+            const newPatient = {
+                id: generatePatientID(),
+                name: document.getElementById('pName').value,
+                dob: document.getElementById('pDob').value,
+                insurance: document.getElementById('pInsurance').value || "N/A",
+                symptoms: document.getElementById('pSymptoms').value,
+                urgency: parseInt(document.getElementById('pUrgency').value),
+                status: "Admitted",
+                doctor: "Unassigned",
+                notes: "",
+                orders: ""
+            };
+
+            rooms[targetRoom] = newPatient;
+            patientsLog.push(newPatient); // Keep history
+
+            // Reset form
+            document.getElementById('admissionForm').reset();
+            
+            updateRoomSelectOptions();
+            renderRooms();
+            renderRecordsTable();
+        });
+
+        // RENDER LIVE ROOMS MATRIX
+        function renderRooms() {
+            const grid = document.getElementById('roomsGrid');
+            grid.innerHTML = '';
+
+            for(let roomName in rooms) {
+                const patient = rooms[roomName];
+                const card = document.createElement('div');
+                card.className = `room-card ${patient ? 'urgency-' + patient.urgency : ''}`;
+
+                if(!patient) {
+                    card.innerHTML = `
+                        <div class="room-header">
+                            <span>${roomName}</span>
+                            <span style="color: #94a3b8; font-size: 12px;">VACANT</span>
+                        </div>
+                        <p style="color: #94a3b8; font-size: 13px; text-align: center; margin: 20px 0;">Ready for Intake</p>
+                    `;
+                } else {
+                    // Create doctor options
+                    let docOptions = `<option value="Unassigned">Call Doctor...</option>`;
+                    doctors.forEach(d => {
+                        let selected = patient.doctor === d ? 'selected' : '';
+                        docOptions += `<option value="${d}" ${selected}>${d}</option>`;
+                    });
+
+                    // Create status options
+                    const statuses = ["Admitted", "Getting checked", "In Diagnostics", "Awaiting Labs", "Stable"];
+                    let statusOptions = '';
+                    statuses.forEach(s => {
+                        let selected = patient.status === s ? 'selected' : '';
+                        statusOptions += `<option value="${s}" ${selected}>${s}</option>`;
+                    });
+
+                    // Create urgency shift drop down
+                    let urgencyOptions = '';
+                    for(let level in urgencyLabels) {
+                        let selected = patient.urgency == level ? 'selected' : '';
+                        urgencyOptions += `<option value="${level}" ${selected}>Lvl ${level}</option>`;
+                    }
+
+                    card.innerHTML = `
+                        <div class="room-header">
+                            <span>${roomName}</span>
+                            <span class="badge b-${patient.urgency}">${urgencyLabels[patient.urgency]}</span>
+                        </div>
+                        <div class="patient-details">
+                            <p><strong>ID:</strong> ${patient.id}</p>
+                            <p><strong>Name:</strong> ${patient.name}</p>
+                            <p><strong>DOB:</strong> ${patient.dob} | <strong>Ins:</strong> ${patient.insurance}</p>
+                            
+                            <div class="symptoms-box">
+                                <strong>Intake Symptoms:</strong> ${patient.symptoms}
+                            </div>
+
+                            <p><strong>Status:</strong> <span style="color: #2563eb; font-weight:bold;">${patient.status}</span></p>
+                            <p><strong>Staff MD:</strong> <span style="color: #0d9488;">${patient.doctor}</span></p>
+                            
+                            <div style="margin-top:8px;">
+                                <label style="font-size:11px;">MD Clinical Notes & Rx/Labs:</label>
+                                <textarea id="note-${roomName}" rows="2" style="font-size:11px;" placeholder="Type medical chart notes, orders, or prescriptions...">${patient.notes}</textarea>
+                                <button class="btn-action" style="width:auto; padding:2px 6px; font-size:11px; float:right; margin-top:2px;" onclick="saveNotes('${roomName}')">Save Notes</button>
+                                <div style="clear:both;"></div>
+                            </div>
+                        </div>
+
+                        <div class="room-actions">
+                            <div class="action-row">
+                                <select onchange="assignDoctor('${roomName}', this.value)">
+                                    ${docOptions}
+                                </select>
+                                <select onchange="updateStatus('${roomName}', this.value)">
+                                    ${statusOptions}
+                                </select>
+                            </div>
+                            <div class="action-row">
+                                <select onchange="changeUrgency('${roomName}', this.value)">
+                                    <option disabled selected>MD Change Urgency</option>
+                                    ${urgencyOptions}
+                                </select>
+                                <button class="btn-action btn-discharge" onclick="triggerDischarge('${roomName}')">Discharge / Refer</button>
+                            </div>
+                        </div>
+                    `;
+                }
+                grid.appendChild(card);
+            }
+        }
+
+        // OPERATIONS ON ROOMS
+        function assignDoctor(roomName, doctorName) {
+            if(rooms[roomName]) {
+                rooms[roomName].doctor = doctorName;
+                syncWithLog(rooms[roomName].id, { doctor: doctorName });
+                renderRooms();
+                renderRecordsTable();
+            }
+        }
+
+        function updateStatus(roomName, status) {
+            if(rooms[roomName]) {
+                rooms[roomName].status = status;
+                syncWithLog(rooms[roomName].id, { status: status });
+                renderRooms();
+                renderRecordsTable();
+            }
+        }
+
+        function changeUrgency(roomName, newLevel) {
+            if(rooms[roomName]) {
+                rooms[roomName].urgency = parseInt(newLevel);
+                syncWithLog(rooms[roomName].id, { urgency: parseInt(newLevel) });
+                renderRooms();
+                renderRecordsTable();
+            }
+        }
+
+        function saveNotes(roomName) {
+            const noteText = document.getElementById(`note-${roomName}`).value;
+            if(rooms[roomName]) {
+                rooms[roomName].notes = noteText;
+                syncWithLog(rooms[roomName].id, { notes: noteText });
+                alert("Patient medical chart updated successfully.");
+                renderRecordsTable();
+            }
+        }
+
+        // DISCHARGE WITH SPECIALIST REFERRAL
+        function triggerDischarge(roomName) {
+            const patient = rooms[roomName];
+            if(!patient) return;
+
+            const referral = prompt(`Discharging ${patient.name}.\nIf they require a clinical referral, enter specialist department (e.g., Cardiologist, Neurologist) or leave blank:`);
+            
+            let finalStatus = "Discharged";
+            if(referral && referral.trim() !== "") {
+                finalStatus += ` (Urged to follow up with ${referral.trim()})`;
+            }
+
+            syncWithLog(patient.id, { 
+                status: finalStatus, 
+                notes: patient.notes + (referral ? ` [Referral Specialist ordered: ${referral}]` : "") 
+            });
+
+            // Clear the room out completely
+            rooms[roomName] = null;
+
+            updateRoomSelectOptions();
+            renderRooms();
+            renderRecordsTable();
+        }
+
+        // HELPER DB SYSTEM
+        function syncWithLog(id, updatedObj) {
+            let index = patientsLog.findIndex(p => p.id === id);
+            if(index !== -1) {
+                patientsLog[index] = { ...patientsLog[index], ...updatedObj };
+            }
+        }
+
+        function renderRecordsTable() {
+            const tbody = document.getElementById('recordsTableBody');
+            tbody.innerHTML = '';
+
+            patientsLog.forEach(p => {
+                let row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><strong>${p.id}</strong></td>
+                    <td>${p.name}</td>
+                    <td>${p.dob}</td>
+                    <td>${p.insurance}</td>
+                    <td style="max-width:180px; font-size:11px; word-wrap:break-word;">${p.symptoms}</td>
+                    <td><span class="badge b-${p.urgency}">Level ${p.urgency}</span></td>
+                    <td>${p.status}</td>
+                    <td>${p.doctor}</td>
+                    <td style="max-width:220px; font-size:11px; color:#475569; word-wrap:break-word;">${p.notes || 'No charts/prescriptions added yet.'}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // Run
+        init();
+    </script>
+</body>
+</html>

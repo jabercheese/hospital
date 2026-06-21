@@ -123,17 +123,31 @@
         .urgency-4 { border-left-color: var(--level4); }
         .urgency-5 { border-left-color: var(--level5); }
 
+        /* Shaking & Blinking Animations */
         .code-blue-active {
             animation: shake 0.3s infinite, blink-blue-bg 0.5s infinite alternate !important;
             border-left-color: #0000ff !important;
         }
+        
+        .attention-shake {
+            animation: shake 0.4s infinite, blink-attention-bg 0.8s infinite alternate !important;
+        }
+
         @keyframes shake {
-            0% { transform: translate(1px, 1px) rotate(0deg); }
-            100% { transform: translate(-1px, -2px) rotate(-1deg); }
+            0% { transform: translate(1px, 1.1px) rotate(0deg); }
+            20% { transform: translate(-1px, -1px) rotate(-0.5deg); }
+            40% { transform: translate(-1.5px, 0px) rotate(0.5deg); }
+            60% { transform: translate(1px, 1.5px) rotate(0deg); }
+            80% { transform: translate(-1px, -1.1px) rotate(0.5deg); }
+            100% { transform: translate(1.1px, -1px) rotate(-0.5deg); }
         }
         @keyframes blink-blue-bg {
             0% { background-color: #ffffff; box-shadow: inset 0 0 20px rgba(0,0,255,0.2); }
             100% { background-color: #93c5fd; box-shadow: inset 0 0 30px rgba(0,0,255,0.6); }
+        }
+        @keyframes blink-attention-bg {
+            0% { background-color: #ffffff; box-shadow: inset 0 0 15px rgba(239, 68, 68, 0.1); }
+            100% { background-color: #fee2e2; box-shadow: inset 0 0 20px rgba(239, 68, 68, 0.3); }
         }
 
         .room-header {
@@ -153,6 +167,9 @@
             border: 1px dashed #cbd5e1; margin-bottom: 10px; text-align: center; font-weight: 600;
         }
         .patient-clickable:hover { background: #e2e8f0; color: var(--primary); }
+
+        .archive-row-clickable { cursor: pointer; }
+        .archive-row-clickable:hover { background-color: #f1f5f9 !important; }
 
         .clinical-box { background: #fafafa; border: 1px solid #e2e8f0; border-radius: 4px; padding: 8px; margin-bottom: 6px; font-size: 12px; }
         .clinical-box strong { color: #475569; display: block; margin-bottom: 2px;}
@@ -243,6 +260,10 @@
                             </select>
                         </div>
                         <div class="form-group"> <label>Allocation Destination</label><select id="pRoom" required></select> </div>
+                        <div class="form-group">
+                            <label>Assign Primary Doctor</label>
+                            <select id="pAssignedDoc" required></select>
+                        </div>
                         <button type="submit">Complete Intake & Bed Assign</button>
                     </form>
                 </div>
@@ -279,9 +300,9 @@
                     </div>
                     <button class="btn-secondary" onclick="createNewUser()">Create Account</button>
 
-                    <h3>Registered Staff Accounts & Passcodes</h3>
+                    <h3>Registered Staff Accounts & Management</h3>
                     <table style="width:100%; font-size:11px;">
-                        <thead><tr><th>Name</th><th>Role</th><th>Passcode</th></tr></thead>
+                        <thead><tr><th>Name</th><th>Role</th><th>Passcode</th><th>Actions</th></tr></thead>
                         <tbody id="managerUserTableBody"></tbody>
                     </table>
                 </div>
@@ -300,7 +321,7 @@
         </div>
 
         <div class="panel">
-            <h2>Permanent Longitudinal Clinical Records Vault</h2>
+            <h2>Permanent Longitudinal Clinical Records Vault (Click row to inspect)</h2>
             <table>
                 <thead>
                     <tr>
@@ -362,16 +383,29 @@
                         </select>
                     </div>
                     <button onclick="submitDoctorUpdates()">Commit Medical Records</button>
-                    <button class="btn-danger" id="btnDischargeExecution" onclick="executeDischarge()" style="margin-top:8px; display:none;">Authorize Discharge & Clear Bed</button>
+                    <button class="btn-danger" id="btnDischargeExecution" onclick="executeDoctorDischarge()" style="margin-top:8px; display:none;">Initiate Discharge Pipeline</button>
                 </div>
 
                 <div id="modalLabActions" class="clinical-box" style="border-color: #eab308; display:none;">
                     <strong>Pathology & Laboratory Diagnostic Workspace</strong>
                     <div class="form-group">
+                        <label>Lab Evaluation Flag</label>
+                        <select id="labFlagSelect">
+                            <option value="All Clear">🟢 All Clear</option>
+                            <option value="Needs Attention">🔴 Needs Attention</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
                         <label>Lab Findings Summary / Diagnostics Text</label>
                         <textarea id="labSummaryText" rows="3" placeholder="Input bloodwork counts, metabolic panels, or imaging notes..."></textarea>
                     </div>
                     <button style="background-color:#eab308; color:black;" onclick="submitLabResults()">Submit Findings & Set Status: "Labs Complete"</button>
+                </div>
+
+                <div id="modalAdmissionActions" class="clinical-box" style="border-color: #28a745; display:none;">
+                    <strong>Admission Desk Confirmation Panel</strong>
+                    <p style="color:#155724; font-size:12px; margin-top:0;">The attending doctor has processed this patient for discharge. Confirm to release the bed slot.</p>
+                    <button style="background-color:#28a745;" onclick="executeFinalAdmissionDischarge()">Confirm & Finalize Discharge</button>
                 </div>
 
                 <div class="clinical-box">
@@ -383,24 +417,29 @@
                     <button class="btn-danger" id="modalCodeBlueBtn" onclick="toggleRoomCodeBlueFromModal()">ACTIVATE ROOM CODE BLUE ALERT</button>
                 </div>
             </div>
+            
+            <div id="modalArchiveBody" style="display:none; margin-top:15px;">
+                <div id="archiveMetaProfile" style="background:#f1f5f9; padding:10px; border-radius:6px; font-size:12px; margin-bottom:15px;"></div>
+                <div class="clinical-box">
+                    <strong>Archived Immutable Clinical Chart</strong>
+                    <div id="archiveChartData"></div>
+                </div>
+            </div>
         </div>
     </div>
 
     <script>
         const TOTAL_ROOMS = 10;
         let activeSelectedRoomName = null;
-
-        // AUTH CONTEXT POINTERS
         let sessionUser = { name: null, role: null };
 
-        // PERSISTENT DATA LAYER STATE OBJECTS
         let state = {
             managerPasscode: "1234",
             users: [
-                { name: "Dr. Gregory House, MD", role: "doctor", pass: "1234" },
-                { name: "Dr. Meredith Grey, MD", role: "doctor", pass: "1234" },
-                { name: "Officer Smith", role: "admission", pass: "1234" },
-                { name: "Lab Tech Alpha", role: "labs", pass: "1234" }
+                { id: "u1", name: "Dr. Gregory House, MD", role: "doctor", pass: "1234" },
+                { id: "u2", name: "Dr. Meredith Grey, MD", role: "doctor", pass: "1234" },
+                { id: "u3", name: "Officer Smith", role: "admission", pass: "1234" },
+                { id: "u4", name: "Lab Tech Alpha", role: "labs", pass: "1234" }
             ],
             patientsLog: [],
             rooms: {}
@@ -409,7 +448,6 @@
         for(let i = 1; i <= TOTAL_ROOMS; i++) { state.rooms[`Room ${i}`] = null; }
         const urgencyLabels = { 1: "Lvl 1: IMMEDIATE", 2: "Lvl 2: Very Urgent", 3: "Lvl 3: Urgent", 4: "Lvl 4: Standard", 5: "Lvl 5: Non-Urgent" };
 
-        // INITIALIZER RUNNERS
         function init() {
             const recovered = localStorage.getItem('ER_COMMAND_STATE_SECURE_2026');
             if(recovered) {
@@ -421,18 +459,31 @@
                     if(parsed.rooms) { for(let r in state.rooms) { if(parsed.rooms[r] !== undefined) state.rooms[r] = parsed.rooms[r]; } }
                 } catch(e) { console.error(e); }
             }
-            localStorage.setItem('ER_COMMAND_STATE_SECURE_2026', JSON.stringify(state));
+            saveState();
             toggleLoginUsernameField();
+            populateDoctorDropdowns();
             renderRoomsGrid();
             renderHistoryTable();
         }
 
         function saveState() { localStorage.setItem('ER_COMMAND_STATE_SECURE_2026', JSON.stringify(state)); }
 
-        // AUTH MECHANISM CONTROLLERS
         function toggleLoginUsernameField() {
             const role = document.getElementById('loginRole').value;
             document.getElementById('loginUserWrapper').style.display = (role === 'manager') ? 'none' : 'block';
+        }
+
+        function populateDoctorDropdowns() {
+            const docSelect = document.getElementById('pAssignedDoc');
+            if (!docSelect) return;
+            docSelect.innerHTML = '<option value="" disabled selected>Assign MD...</option>';
+            state.users.forEach(u => {
+                if(u.role === 'doctor') {
+                    let opt = document.createElement('option');
+                    opt.value = u.name; opt.textContent = u.name;
+                    docSelect.appendChild(opt);
+                }
+            });
         }
 
         function attemptAuthentication() {
@@ -441,32 +492,25 @@
             const username = document.getElementById('loginUsername').value.trim();
 
             if(role === 'manager') {
-                if(pass === state.managerPasscode) {
-                    authorizeSession("System Administrator", "manager");
-                } else { alert("Access Denied: Invalid Master Passcode."); }
+                if(pass === state.managerPasscode) { authorizeSession("System Administrator", "manager"); } 
+                else { alert("Access Denied: Invalid Master Passcode."); }
             } else {
                 if(!username) { alert("Please provide a valid user account identifier."); return; }
                 const matchedUser = state.users.find(u => u.role === role && u.name.toLowerCase() === username.toLowerCase() && u.pass === pass);
-                
-                if(matchedUser) {
-                    authorizeSession(matchedUser.name, matchedUser.role);
-                } else { alert("Authentication Failure: Account details do not match active registry."); }
+                if(matchedUser) { authorizeSession(matchedUser.name, matchedUser.role); } 
+                else { alert("Authentication Failure: Account details do not match active registry."); }
             }
         }
 
         function authorizeSession(name, role) {
-            sessionUser.name = name;
-            sessionUser.role = role;
-
+            sessionUser.name = name; sessionUser.role = role;
             document.getElementById('loginOverlay').style.display = 'none';
             document.getElementById('appContent').style.display = 'block';
             document.getElementById('activeUserLabel').textContent = `Logged in: ${name} [${role.toUpperCase()}]`;
 
-            // Clear inputs
             document.getElementById('loginPassword').value = "";
             document.getElementById('loginUsername').value = "";
 
-            // Toggle role-specific workspace views
             document.querySelectorAll('.portal-workspace').forEach(p => p.style.display = 'none');
             if(role === 'admission') {
                 document.getElementById('panel-admission').style.display = 'block';
@@ -489,20 +533,30 @@
             toggleLoginUsernameField();
         }
 
-        // ADMINISTRATIVE USER ACCOUNT CONTROLLERS
         function createNewUser() {
             const role = document.getElementById('mgmtRoleType').value;
             const name = document.getElementById('mgmtName').value.trim();
             const pass = document.getElementById('mgmtPass').value.trim();
 
             if(!name || !pass) { alert("All user registration parameters are required."); return; }
-            state.users.push({ name, role, pass });
+            const id = 'u' + Math.floor(Math.random() * 1000000);
+            state.users.push({ id, name, role, pass });
             saveState();
             renderManagerAccountsTable();
+            populateDoctorDropdowns();
 
             document.getElementById('mgmtName').value = "";
             document.getElementById('mgmtPass').value = "";
             alert(`Account for ${name} [${role}] created successfully.`);
+        }
+
+        function deleteUser(uid) {
+            if(confirm("Are you sure you want to delete this staff member account?")) {
+                state.users = state.users.filter(u => u.id !== uid);
+                saveState();
+                renderManagerAccountsTable();
+                populateDoctorDropdowns();
+            }
         }
 
         function renderManagerAccountsTable() {
@@ -510,7 +564,11 @@
             tbody.innerHTML = '';
             state.users.forEach(u => {
                 let r = document.createElement('tr');
-                r.innerHTML = `<td><strong>${u.name}</strong></td><td>${u.role.toUpperCase()}</td><td><code>${u.pass}</code></td>`;
+                r.innerHTML = `
+                    <td><strong>${u.name}</strong></td>
+                    <td>${u.role.toUpperCase()}</td>
+                    <td><code>${u.pass}</code></td>
+                    <td><button class="btn-danger" style="margin:0; padding:2px 6px; font-size:11px;" onclick="deleteUser('${u.id}')">Delete</button></td>`;
                 tbody.appendChild(r);
             });
         }
@@ -520,7 +578,6 @@
             if(code) { state.managerPasscode = code; saveState(); alert("Master Admin passcode modified."); }
         }
 
-        // CLINICAL SYSTEM ENGINE MODULES
         function calculateAge(dobString) {
             if(!dobString) return "N/A";
             const birthDate = new Date(dobString);
@@ -581,6 +638,7 @@
         document.getElementById('admissionForm').addEventListener('submit', function(e) {
             e.preventDefault();
             const roomTarget = document.getElementById('pRoom').value;
+            const assignedDoc = document.getElementById('pAssignedDoc').value;
             if(!roomTarget || state.rooms[roomTarget]) { alert("Allocation conflict."); return; }
 
             const newPatient = {
@@ -591,7 +649,7 @@
                 insurance: document.getElementById('pInsurance').value.trim() || "N/A",
                 symptoms: document.getElementById('pSymptoms').value.trim(),
                 urgency: parseInt(document.getElementById('pUrgency').value),
-                status: "Admitted", diagnosis: "", labsSummary: "", rx: "", dischargeNotes: "", referralSpecialty: "", codeBlue: false
+                status: "Admitted", assignedDoctor: assignedDoc, diagnosis: "", labsSummary: "", labFlag: "All Clear", rx: "", dischargeNotes: "", referralSpecialty: "", codeBlue: false
             };
 
             state.rooms[roomTarget] = newPatient;
@@ -607,7 +665,22 @@
             const grid = document.getElementById('roomsGrid'); grid.innerHTML = '';
             for(let rName in state.rooms) {
                 const p = state.rooms[rName]; const card = document.createElement('div');
-                card.className = `room-card ${p ? 'urgency-' + p.urgency : ''} ${p && p.codeBlue ? 'code-blue-active' : ''}`;
+                
+                // Determine Shake Criteria based on user roles and tracking milestones
+                let isShaking = false;
+                if(p && !p.codeBlue) {
+                    if(p.status === "Admitted" && sessionUser.role === 'doctor' && sessionUser.name === p.assignedDoctor) {
+                        isShaking = true;
+                    } else if(p.status === "Awaiting Labs" && sessionUser.role === 'labs') {
+                        isShaking = true;
+                    } else if(p.status === "Labs Complete" && sessionUser.role === 'doctor' && sessionUser.name === p.assignedDoctor) {
+                        isShaking = true;
+                    } else if(p.status === "Awaiting Admission Desk Discharge Confirmation" && sessionUser.role === 'admission') {
+                        isShaking = true;
+                    }
+                }
+
+                card.className = `room-card ${p ? 'urgency-' + p.urgency : ''} ${p && p.codeBlue ? 'code-blue-active' : ''} ${isShaking ? 'attention-shake' : ''}`;
                 
                 if(!p) {
                     card.innerHTML = `<div class="room-header"><span>${rName}</span><span style="color:#94a3b8; font-size:11px;">VACANT</span></div><p style="text-align:center; color:#94a3b8; font-size:12px; margin:15px 0;">Vacant Bed</p>`;
@@ -617,6 +690,7 @@
                         <div class="patient-clickable" onclick="launchSecureGate('${rName}')">🔓 ACCESS PATIENT CHART LOG</div>
                         <div style="font-size:12px;">
                             <p style="margin:2px 0;"><strong>Patient:</strong> ${p.lastName}, ${p.firstName} (${calculateAge(p.dob)})</p>
+                            <p style="margin:2px 0;"><strong>MD:</strong> ${p.assignedDoctor || 'Unassigned'}</p>
                             <p style="margin:2px 0;"><strong>Status:</strong> <span style="color:var(--primary); font-weight:bold;">${p.status}</span></p>
                         </div>`;
                 }
@@ -624,13 +698,14 @@
             }
         }
 
-        // CHART PROTECTION INTERFACES
         function launchSecureGate(roomName) {
             activeSelectedRoomName = roomName; const p = state.rooms[roomName]; if(!p) return;
             document.getElementById('modalPatientTitle').textContent = `Chart Interface: ${roomName}`;
             
             document.getElementById('verifyDocInputDob').value = "";
-            if(sessionUser.role === 'doctor') {
+            document.getElementById('modalArchiveBody').style.display = "none";
+            
+            if(sessionUser.role === 'doctor' && sessionUser.name === p.assignedDoctor) {
                 document.getElementById('modalDocVerificationGate').style.display = "block";
                 document.getElementById('modalSecureBody').style.display = "none";
             } else {
@@ -656,22 +731,26 @@
             document.getElementById('patientMetaProfile').innerHTML = `
                 <strong>Patient ID:</strong> ${p.id} | <strong>Legal Name:</strong> ${p.lastName}, ${p.firstName} <br>
                 <strong>DOB:</strong> ${p.dob} (${calculateAge(p.dob)}) | <strong>Insurance:</strong> ${p.insurance}<br>
+                <strong>Assigned Doctor:</strong> ${p.assignedDoctor}<br>
                 <strong>Symptoms:</strong> <span style="color:#ef4444;">${p.symptoms}</span>`;
 
+            const flagColor = p.labFlag === 'Needs Attention' ? '#ef4444' : '#16a34a';
             document.getElementById('chartDisplayData').innerHTML = `
                 <p><strong>Tracking Status:</strong> ${p.status}</p><p><strong>Diagnosis (Dx):</strong> ${p.diagnosis || 'None'}</p>
-                <p><strong>Therapeutics (Rx):</strong> ${p.rx || 'None'}</p><p><strong>Diagnostics/Labs summary:</strong> ${p.labsSummary || 'Awaiting Action'}</p>
+                <p><strong>Therapeutics (Rx):</strong> ${p.rx || 'None'}</p>
+                <p><strong>Lab Diagnostics Flag:</strong> <span style="color:${flagColor}; font-weight:bold;">${p.labFlag || 'All Clear'}</span></p>
+                <p><strong>Diagnostics/Labs summary:</strong> ${p.labsSummary || 'Awaiting Action'}</p>
                 <p><strong>Discharge Context:</strong> ${p.dischargeNotes || 'None'}</p><p><strong>Outpatient Specialist Referral:</strong> ${p.referralSpecialty || 'None'}</p>`;
 
-            // Role view constraints
-            document.getElementById('modalDoctorActions').style.display = (sessionUser.role === 'doctor') ? 'block' : 'none';
+            // Toggle operational sub panels inside the modal display ecosystem
+            document.getElementById('modalDoctorActions').style.display = (sessionUser.role === 'doctor' && sessionUser.name === p.assignedDoctor) ? 'block' : 'none';
             document.getElementById('modalLabActions').style.display = (sessionUser.role === 'labs') ? 'block' : 'none';
+            document.getElementById('modalAdmissionActions').style.display = (sessionUser.role === 'admission' && p.status === "Awaiting Admission Desk Discharge Confirmation") ? 'block' : 'none';
             document.getElementById('modalCodeBlueWrapper').style.display = (['doctor','admission','manager'].includes(sessionUser.role)) ? 'block' : 'none';
 
-            if(sessionUser.role === 'doctor') {
+            if(sessionUser.role === 'doctor' && sessionUser.name === p.assignedDoctor) {
                 document.getElementById('mdStatusSelect').value = ["Getting checked","Awaiting Labs","In Diagnostics","Stable"].includes(p.status) ? p.status : "Getting checked";
-                // Enforce Lab restrictions on status choices
-                if(p.status === "Awaiting Labs") { document.getElementById('mdStatusSelect').disabled = true; } else { document.getElementById('mdStatusSelect').disabled = false; }
+                document.getElementById('mdStatusSelect').disabled = (p.status === "Awaiting Labs");
                 
                 document.getElementById('mdUrgencySelect').value = p.urgency;
                 document.getElementById('mdDxText').value = p.diagnosis;
@@ -679,23 +758,23 @@
                 document.getElementById('mdDischargeNotesText').value = p.dischargeNotes;
                 document.getElementById('mdReferralSelect').value = p.referralSpecialty;
                 
-                // Allow discharge only if a prescription (Rx) is logged
-                document.getElementById('btnDischargeExecution').style.display = (p.rx.trim() !== "") ? "block" : "none";
+                // Allow initiating discharge if prescription is detailed
+                document.getElementById('btnDischargeExecution').style.display = (p.rx.trim() !== "" && p.status !== "Awaiting Admission Desk Discharge Confirmation") ? "block" : "none";
             }
             if(sessionUser.role === 'labs') {
                 document.getElementById('labSummaryText').value = p.labsSummary;
-                // Lab processing rule constraint check
-                if(p.status !== "Awaiting Labs") {
-                    document.getElementById('labSummaryText').disabled = true;
-                } else { document.getElementById('labSummaryText').disabled = false; }
+                document.getElementById('labFlagSelect').value = p.labFlag || "All Clear";
+                document.getElementById('labSummaryText').disabled = (p.status !== "Awaiting Labs");
+                document.getElementById('labFlagSelect').disabled = (p.status !== "Awaiting Labs");
             }
             document.getElementById('modalCodeBlueBtn').textContent = p.codeBlue ? "STAND DOWN ALERT" : "ACTIVATE ROOM CODE BLUE ALERT";
         }
 
-        // CLINICAL COMMITS
         function submitDoctorUpdates() {
             const p = state.rooms[activeSelectedRoomName]; if(!p) return;
-            if(p.status !== "Awaiting Labs") { p.status = document.getElementById('mdStatusSelect').value; }
+            if(p.status !== "Awaiting Labs" && p.status !== "Awaiting Admission Desk Discharge Confirmation") { 
+                p.status = document.getElementById('mdStatusSelect').value; 
+            }
             p.urgency = parseInt(document.getElementById('mdUrgencySelect').value);
             p.diagnosis = document.getElementById('mdDxText').value.trim();
             p.rx = document.getElementById('mdRxText').value.trim();
@@ -711,20 +790,57 @@
             if(p.status !== "Awaiting Labs") { alert("Action blocked: Laboratory processing can only be performed when the tracking status is set to 'Awaiting Labs'."); return; }
             
             p.labsSummary = document.getElementById('labSummaryText').value.trim();
+            p.labFlag = document.getElementById('labFlagSelect').value;
             p.status = "Labs Complete";
+            
             syncGlobalArchiveLog(p.id, p); saveState(); displaySecureChart(); renderRoomsGrid(); renderHistoryTable();
             alert("Labs processed successfully.");
         }
 
-        function executeDischarge() {
+        function executeDoctorDischarge() {
             const p = state.rooms[activeSelectedRoomName]; if(!p) return;
-            p.status = p.referralSpecialty ? `Discharged (Urged follow up with ${p.referralSpecialty})` : "Discharged Formally";
+            p.status = "Awaiting Admission Desk Discharge Confirmation";
+            syncGlobalArchiveLog(p.id, p); saveState(); displaySecureChart(); renderRoomsGrid(); renderHistoryTable();
+            alert("Discharge file forwarded to Admission desk for final validation check.");
+        }
+
+        function executeFinalAdmissionDischarge() {
+            const p = state.rooms[activeSelectedRoomName]; if(!p) return;
+            p.status = p.referralSpecialty ? `Discharged (Referral: ${p.referralSpecialty})` : "Discharged Formally";
             syncGlobalArchiveLog(p.id, p);
             state.rooms[activeSelectedRoomName] = null;
             saveState(); closeModal(); updateRoomDropdown(); renderRoomsGrid(); renderHistoryTable();
+            alert("Discharge confirmed. Bed slot freed up.");
         }
 
-        // EMERGENCY MODULATORS
+        function viewArchivedPatient(pid) {
+            const p = state.patientsLog.find(item => item.id === pid);
+            if(!p) return;
+
+            document.getElementById('modalPatientTitle').textContent = `Archived File View: ${p.id}`;
+            document.getElementById('modalDocVerificationGate').style.display = "none";
+            document.getElementById('modalSecureBody').style.display = "none";
+            document.getElementById('modalArchiveBody').style.display = "block";
+
+            document.getElementById('archiveMetaProfile').innerHTML = `
+                <strong>Patient ID:</strong> ${p.id} | <strong>Legal Name:</strong> ${p.lastName}, ${p.firstName} <br>
+                <strong>DOB:</strong> ${p.dob} (${calculateAge(p.dob)}) | <strong>Insurance:</strong> ${p.insurance}<br>
+                <strong>Original Primary Doctor:</strong> ${p.assignedDoctor || 'N/A'}<br>
+                <strong>Symptoms/Intake Complaint:</strong> <span style="color:#ef4444;">${p.symptoms}</span>`;
+
+            const flagColor = p.labFlag === 'Needs Attention' ? '#ef4444' : '#16a34a';
+            document.getElementById('archiveChartData').innerHTML = `
+                <p><strong>Final Disposition Status:</strong> <span style="color:var(--primary); font-weight:bold;">${p.status}</span></p>
+                <p><strong>Clinical Diagnosis (Dx):</strong> ${p.diagnosis || 'None logged'}</p>
+                <p><strong>Therapeutics & Prescriptions (Rx):</strong> ${p.rx || 'None logged'}</p>
+                <p><strong>Diagnostic Labs Evaluation Flag:</strong> <span style="color:${flagColor}; font-weight:bold;">${p.labFlag || 'All Clear'}</span></p>
+                <p><strong>Laboratory Findings Narrative summary:</strong> ${p.labsSummary || 'No data recorded'}</p>
+                <p><strong>Discharge Release Notes:</strong> ${p.dischargeNotes || 'None'}</p>
+                <p><strong>Outpatient Follow up Target Specialty:</strong> ${p.referralSpecialty || 'None matching'}</p>`;
+
+            document.getElementById('secureModal').classList.add('active');
+        }
+
         function toggleRoomCodeBlueFromModal() {
             const p = state.rooms[activeSelectedRoomName]; if(!p) return;
             p.codeBlue = !p.codeBlue; saveState(); displaySecureChart(); renderRoomsGrid();
@@ -743,9 +859,11 @@
             const tbody = document.getElementById('historyTableBody'); tbody.innerHTML = '';
             state.patientsLog.forEach(p => {
                 let row = document.createElement('tr');
+                row.className = "archive-row-clickable";
+                row.setAttribute('onclick', `viewArchivedPatient('${p.id}')`);
                 row.innerHTML = `
                     <td><strong>${p.id}</strong></td><td>${p.lastName}, ${p.firstName}</td><td>${calculateAge(p.dob)}<br><small>${p.dob}</small></td>
-                    <td>${p.symptoms}</td><td>${p.diagnosis || '-'}</td><td style="color:#b45309;">${p.labsSummary || '-'}</td><td style="color:#16a34a;">${p.rx || '-'}</td>
+                    <td>${p.symptoms}</td><td>${p.diagnosis || '-'}</td><td style="color:#b45309;">[${p.labFlag || 'All Clear'}] ${p.labsSummary || '-'}</td><td style="color:#16a34a;">${p.rx || '-'}</td>
                     <td><strong>${p.status}</strong>${p.referralSpecialty ? `<br><small style="color:var(--primary);">Ref: ${p.referralSpecialty}</small>` : ''}</td>`;
                 tbody.appendChild(row);
             });

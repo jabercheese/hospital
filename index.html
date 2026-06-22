@@ -97,6 +97,7 @@
             border: none; border-radius: 4px; font-weight: bold; cursor: pointer; margin-top: 5px;
         }
         button:hover { background-color: #1d4ed8; }
+        button:disabled { background-color: #cbd5e1 !important; color: #94a3b8 !important; cursor: not-allowed; }
         .btn-danger { background-color: #ef4444; }
         .btn-danger:hover { background-color: #dc2626; }
         .btn-secondary { background-color: #64748b; }
@@ -189,6 +190,7 @@
 </head>
 <body>
 
+    <!-- CENTRAL LOGIN PAGE OVERLAY -->
     <div id="loginOverlay">
         <div class="login-card">
             <h1>Clinical Access Gateway</h1>
@@ -221,6 +223,7 @@
         </div>
     </div>
 
+    <!-- MAIN APP SCREEN -->
     <div id="appContent" style="display:none;">
         <header>
             <h1>Emergency Command Center</h1>
@@ -231,8 +234,10 @@
         </header>
 
         <div class="dashboard-layout">
+            <!-- LEFT ACTION WORKSPACES -->
             <div class="left-column">
                 
+                <!-- ADMISSION PORTAL -->
                 <div id="panel-admission" class="panel portal-workspace" style="display:none;">
                     <h2>New Intake Triage</h2>
                     <div style="background: #f0fdf4; border: 1px solid #bbf7d0; padding: 8px; border-radius: 4px; margin-bottom: 15px;">
@@ -271,11 +276,13 @@
                     </form>
                 </div>
 
+                <!-- CLINICAL INSTRUCTIONS PANELS FOR DOCTORS/LABS -->
                 <div id="panel-clinical-info" class="panel portal-workspace" style="display:none;">
                     <h2>Clinical Operations Area</h2>
                     <p style="font-size:13px; color: #64748b;">Please select a patient chart inside an active ER bay room on the dashboard to review diagnostics, record notes, provide prescriptions, or process discharges.</p>
                 </div>
 
+                <!-- MANAGER PORTAL -->
                 <div id="panel-manager" class="panel portal-workspace" style="display:none;">
                     <h2>System Control Manager Dashboard</h2>
                     <div class="form-group" style="background:#fef08a; padding:10px; border-radius:6px; border:1px solid #fef08a;">
@@ -312,6 +319,7 @@
 
             </div>
 
+            <!-- RIGHT SYSTEM BED MONITOR GRID -->
             <div class="right-column">
                 <div class="panel">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
@@ -323,6 +331,7 @@
             </div>
         </div>
 
+        <!-- RECORDS LOG BLOCK -->
         <div class="panel">
             <h2>Permanent Longitudinal Clinical Records Vault (Click row to inspect)</h2>
             <table>
@@ -336,6 +345,7 @@
         </div>
     </div>
 
+    <!-- PROTECTED HEALTH RECORD MODAL GATEWAY -->
     <div class="modal-overlay" id="secureModal">
         <div class="modal-content">
             <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #e2e8f0; padding-bottom:8px;">
@@ -343,6 +353,7 @@
                 <button onclick="closeModal()" style="width:auto; margin:0; padding:4px 8px; background:#ef4444;">X</button>
             </div>
             
+            <!-- BED SECONDARY IDENTITY CHECK FOR DOCTORS WITH ACCESS CODE BYPASS -->
             <div id="modalDocVerificationGate" style="display:none; margin: 20px 0;">
                 <p style="font-size:13px; font-weight:bold; color:var(--primary);">Identity Check: Verify Patient DOB to unlock Chart:</p>
                 <input type="date" id="verifyDocInputDob" style="margin-bottom:10px;">
@@ -351,9 +362,11 @@
                 <button class="btn-danger" onclick="bypassVerificationEmergency()">CRITICAL EMERGENCY BYPASS</button>
             </div>
 
+            <!-- PATIENT CHART INTERFACE -->
             <div id="modalSecureBody" style="display:none; margin-top:15px;">
                 <div id="patientMetaProfile" style="background:#f1f5f9; padding:10px; border-radius:6px; font-size:12px; margin-bottom:15px;"></div>
                 
+                <!-- ATTENDING PHYSICIAN PANEL -->
                 <div id="modalDoctorActions" class="clinical-box" style="border-color: #3b82f6; display:none;">
                     <strong>Attending Physician Panel</strong>
                     <div class="form-group">
@@ -362,7 +375,6 @@
                             <option value="Getting checked">Getting checked</option>
                             <option value="Awaiting Labs">Awaiting Labs</option>
                             <option value="In Diagnostics">In Diagnostics</option>
-                            <option value="Stable">Stable</option>
                         </select>
                     </div>
                     <div class="form-group">
@@ -386,9 +398,11 @@
                         </select>
                     </div>
                     <button onclick="submitDoctorUpdates()">Commit Medical Records</button>
-                    <button class="btn-danger" id="btnDischargeExecution" onclick="executeDoctorDischarge()" style="margin-top:8px; display:none;">Initiate Discharge Pipeline</button>
+                    <button class="btn-danger" id="btnDischargeExecution" onclick="executeDoctorDischarge()" style="margin-top:8px;">Initiate Discharge Pipeline</button>
+                    <small id="dischargeDisabledWarning" style="color:#dc3545; display:none; font-weight:bold; margin-top:4px; text-align:center;">⚠️ Discharge button locked while status is 'Awaiting Labs'</small>
                 </div>
 
+                <!-- LABORATORY DATA LOG WORKSPACE -->
                 <div id="modalLabActions" class="clinical-box" style="border-color: #eab308; display:none;">
                     <strong>Pathology & Laboratory Diagnostic Workspace</strong>
                     <div class="form-group">
@@ -405,22 +419,26 @@
                     <button style="background-color:#eab308; color:black;" onclick="submitLabResults()">Submit Findings & Set Status: "Labs Complete"</button>
                 </div>
 
+                <!-- ADMISSION OFFICER CONFIRM DISCHARGE WORKSPACE -->
                 <div id="modalAdmissionActions" class="clinical-box" style="border-color: #28a745; display:none;">
                     <strong>Admission Desk Confirmation Panel</strong>
                     <p style="color:#155724; font-size:12px; margin-top:0;">The attending doctor has processed this patient for discharge. Confirm to release the bed slot.</p>
                     <button style="background-color:#28a745;" onclick="executeFinalAdmissionDischarge()">Confirm & Finalize Discharge</button>
                 </div>
 
+                <!-- SYSTEM CHART LOG DISPLAY -->
                 <div class="clinical-box">
                     <strong>Current Active Patient Chart Log</strong>
                     <div id="chartDisplayData"></div>
                 </div>
 
+                <!-- CALL ROOM ALERT OVERRIDES -->
                 <div class="form-group" style="margin-top:10px;" id="modalCodeBlueWrapper">
                     <button class="btn-danger" id="modalCodeBlueBtn" onclick="toggleRoomCodeBlueFromModal()">ACTIVATE ROOM CODE BLUE ALERT</button>
                 </div>
             </div>
             
+            <!-- READ ONLY ARCHIVE DISPLAY CONTROLLER -->
             <div id="modalArchiveBody" style="display:none; margin-top:15px;">
                 <div id="archiveMetaProfile" style="background:#f1f5f9; padding:10px; border-radius:6px; font-size:12px; margin-bottom:15px;"></div>
                 <div class="clinical-box">
@@ -476,7 +494,6 @@
 
         function saveState() { localStorage.setItem('ER_COMMAND_STATE_SECURE_2026', JSON.stringify(state)); }
 
-        // RESET CORE ENGINE
         function triggerMasterSystemReset() {
             const promptCode = prompt("Enter the Master Passcode (1234) to confirm wiping all medical systems data:");
             if (promptCode === "1234") {
@@ -745,7 +762,15 @@
             else { alert("Identity verification failure: DOB mismatch."); }
         }
 
-        function bypassVerificationEmergency() { alert("EMERGENCY BYPASS AUTHORIZED."); displaySecureChart(); }
+        function bypassVerificationEmergency() { 
+            const codeInput = prompt("Enter Security Override Passcode to clear verification barrier:");
+            if(codeInput === "1234") {
+                alert("EMERGENCY BYPASS AUTHORIZED."); 
+                displaySecureChart(); 
+            } else if(codeInput !== null) {
+                alert("Invalid Access Code. Emergency bypass denied.");
+            }
+        }
 
         function displaySecureChart() {
             document.getElementById('modalDocVerificationGate').style.display = "none";
@@ -772,7 +797,7 @@
             document.getElementById('modalCodeBlueWrapper').style.display = (['doctor','admission','manager'].includes(sessionUser.role)) ? 'block' : 'none';
 
             if(sessionUser.role === 'doctor' && sessionUser.name === p.assignedDoctor) {
-                document.getElementById('mdStatusSelect').value = ["Getting checked","Awaiting Labs","In Diagnostics","Stable"].includes(p.status) ? p.status : "Getting checked";
+                document.getElementById('mdStatusSelect').value = ["Getting checked","Awaiting Labs","In Diagnostics"].includes(p.status) ? p.status : "Getting checked";
                 document.getElementById('mdStatusSelect').disabled = (p.status === "Awaiting Labs");
                 
                 document.getElementById('mdUrgencySelect').value = p.urgency;
@@ -781,7 +806,14 @@
                 document.getElementById('mdDischargeNotesText').value = p.dischargeNotes;
                 document.getElementById('mdReferralSelect').value = p.referralSpecialty;
                 
-                document.getElementById('btnDischargeExecution').style.display = (p.rx.trim() !== "" && p.status !== "Awaiting Admission Desk Discharge Confirmation") ? "block" : "none";
+                // Discharge engine configuration: block if status is specifically "Awaiting Labs"
+                if(p.status === "Awaiting Labs") {
+                    document.getElementById('btnDischargeExecution').disabled = true;
+                    document.getElementById('dischargeDisabledWarning').style.display = "block";
+                } else {
+                    document.getElementById('btnDischargeExecution').disabled = false;
+                    document.getElementById('dischargeDisabledWarning').style.display = "none";
+                }
             }
             if(sessionUser.role === 'labs') {
                 document.getElementById('labSummaryText').value = p.labsSummary;
@@ -821,9 +853,11 @@
 
         function executeDoctorDischarge() {
             const p = state.rooms[activeSelectedRoomName]; if(!p) return;
+            if(p.status === "Awaiting Labs") { alert("Discharge authorization blocked while awaiting laboratory findings."); return; }
+            
             p.status = "Awaiting Admission Desk Discharge Confirmation";
             syncGlobalArchiveLog(p.id, p); saveState(); displaySecureChart(); renderRoomsGrid(); renderHistoryTable();
-            alert("Discharge file forwarded to Admission desk for final validation check.");
+            alert("Discharge initiated. File forwarded to Admission desk for final confirmation.");
         }
 
         function executeFinalAdmissionDischarge() {
@@ -832,7 +866,7 @@
             syncGlobalArchiveLog(p.id, p);
             state.rooms[activeSelectedRoomName] = null;
             saveState(); closeModal(); updateRoomDropdown(); renderRoomsGrid(); renderHistoryTable();
-            alert("Discharge confirmed. Bed slot freed up.");
+            alert("Discharge confirmed by Admission Officer. Bed slot freed up.");
         }
 
         function viewArchivedPatient(pid) {
